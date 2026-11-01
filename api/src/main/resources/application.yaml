@@ -1,0 +1,10 @@
+spring:
+  application.name: api
+
+  # Database configurations
+  datasource:
+    url: ${JTASKS_DB_URL}
+    username: ${JTASKS_DB_USERNAME}
+    password: ${JTASKS_DB_PASSWORD}
+
+server.port: ${JTASKS_SERVER_PORT}
