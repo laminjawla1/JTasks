@@ -1,15 +1,21 @@
 package com.jgroup.jtasks.roles;
 
 import com.jgroup.jtasks.commons.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import com.jgroup.jtasks.memberships.Membership;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+import java.util.HashSet;
+import java.util.Set;
+
+@Data
 @Entity
-@Getter
-@Setter
 @Table(name = "roles")
+@EqualsAndHashCode(callSuper = true)
 public class Role extends BaseEntity {
     private String name;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<Membership> memberships = new HashSet<>();
 }

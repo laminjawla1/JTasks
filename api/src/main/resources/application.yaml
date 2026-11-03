@@ -7,4 +7,12 @@ spring:
     username: ${JTASKS_DB_USERNAME}
     password: ${JTASKS_DB_PASSWORD}
 
+  jpa.hibernate.ddl-auto: none
+
+  # Flyway Configuration
+  flyway.enabled: true
+  flyway.locations: classpath:db/migration
+  # Safely baseline existing databases if applying Flyway to an already active schema
+  flyway.baseline-on-migrate: true
+
 server.port: ${JTASKS_SERVER_PORT}

@@ -1,9 +1,8 @@
 package com.jgroup.jtasks.roles;
 
-public enum RolesData {
+public enum Roles {
     OWNER,
     ADMIN,
     EDITOR,
-    USER,
-    GUEST
+    VIEWER,
 }
