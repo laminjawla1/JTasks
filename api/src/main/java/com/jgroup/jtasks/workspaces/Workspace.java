@@ -16,4 +16,8 @@ public class Workspace extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    public WorkspaceResponse response() {
+        return new WorkspaceResponse(getId(), name, status, getCreatedAt(), getUpdatedAt());
+    }
 }
