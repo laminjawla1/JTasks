@@ -15,4 +15,12 @@ spring:
     validate-on-migrate: true
     locations: classpath:db/migration
 
-server.port: ${JTASKS_SERVER_PORT}
+app:
+  jwt:
+    secret: ${JTASKS_JWT_SECRET}
+    access-ttl: 15m
+    refresh-ttl: 7d
+
+server:
+  port: ${JTASKS_SERVER_PORT}
+  servlet.context-path: /api
