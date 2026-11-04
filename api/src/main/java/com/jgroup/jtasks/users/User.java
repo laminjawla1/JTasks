@@ -1,9 +1,13 @@
 package com.jgroup.jtasks.users;
 
 import com.jgroup.jtasks.commons.BaseEntity;
+import com.jgroup.jtasks.projects.tasks.Task;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -26,4 +30,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @ManyToMany(mappedBy = "assignees", fetch = FetchType.LAZY)
+    private Set<Task> tasks = new HashSet<>();
 }

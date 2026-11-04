@@ -14,8 +14,14 @@ import java.util.Set;
 @Table(name = "roles")
 @EqualsAndHashCode(callSuper = true)
 public class Role extends BaseEntity {
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(unique = true, nullable = false)
+    private Roles name;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private Set<Membership> memberships = new HashSet<>();
+
+    public Role(Roles name) {
+        this.name = name;
+    }
 }

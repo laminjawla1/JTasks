@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.projects;
+package com.jgroup.jtasks.projects.projects;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

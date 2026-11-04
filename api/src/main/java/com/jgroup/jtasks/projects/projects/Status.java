@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.projects;
+package com.jgroup.jtasks.projects.projects;
 
 public enum Status {
     PENDING,
