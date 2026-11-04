@@ -176,29 +176,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    // Unexpected errors: log the details, but never send internal messages to the client.
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> exceptionHandler(Exception e, HttpServletRequest request) {
-        // Spring's own request errors (unknown URL, wrong method, missing parameter, ...) already carry the right status
-        if (e instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
-            HttpStatus status = HttpStatus.valueOf(errorResponse.getStatusCode().value());
-            String detail = errorResponse.getBody().getDetail();
-            ApiErrorResponse error = ApiErrorResponse.builder()
-                    .status(status)
-                    .errors(Map.of("message", detail != null ? detail : status.getReasonPhrase()))
-                    .path(request.getRequestURI())
-                    .timestamp(Instant.now())
-                    .build();
-            log.warn("Request error {}: {}", status.value(), e.getMessage());
-            return ResponseEntity.status(status).body(error);
-        }
-        ApiErrorResponse error = ApiErrorResponse.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .errors(Map.of("message", "An unexpected error occurred. Please try again or contact support."))
-                .path(request.getRequestURI())
-                .timestamp(Instant.now())
-                .build();
-        log.error("Error:", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
 }
