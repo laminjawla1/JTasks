@@ -29,12 +29,14 @@ CREATE TABLE roles (
 CREATE TABLE workspaces (
     id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    CONSTRAINT pk_workspaces PRIMARY KEY (id),
-    CONSTRAINT uq_name UNIQUE (name)
+    CONSTRAINT pk_workspaces_id PRIMARY KEY (id),
+    CONSTRAINT uq_workspaces_name UNIQUE (name),
+    CONSTRAINT uq_workspaces_slug UNIQUE (name)
 );
 
 
@@ -49,9 +51,9 @@ CREATE TABLE projects (
     start_date DATE NOT NULL,
     end_date DATE,
 
-    CONSTRAINT pk_projects PRIMARY KEY (id),
-    CONSTRAINT fk_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    CONSTRAINT fk_lead_id FOREIGN KEY (lead_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT pk_projects_id PRIMARY KEY (id),
+    CONSTRAINT fk_projects_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    CONSTRAINT fk_projects_lead_id FOREIGN KEY (lead_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_projects_workspace_id ON projects (workspace_id);
