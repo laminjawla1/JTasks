@@ -18,8 +18,7 @@ spring:
 app:
   jwt:
     secret: ${JTASKS_JWT_SECRET}
-    access-ttl: 15m
-    refresh-ttl: 7d
+    access-ttl: 1d
 
 server:
   port: ${JTASKS_SERVER_PORT}

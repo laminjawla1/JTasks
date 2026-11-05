@@ -2,6 +2,7 @@ package com.jgroup.jtasks.users;
 
 import com.jgroup.jtasks.jwt.JwtService;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 
 @Service
@@ -53,5 +56,24 @@ public class UserService {
         } catch (BadCredentialsException _) {
             throw new SecurityException("Invalid email or password");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse profile(User user) {
+        return userRepository
+                .findById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"))
+                .response();
+    }
+
+    @Transactional
+    public UserResponse update(UUID id, UserUpdate request) {
+        var user = userRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setEmail(request.email());
+        return userRepository.save(user).response();
     }
 }
