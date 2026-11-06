@@ -16,6 +16,6 @@ public class JTasksUserDetailService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(() -> new SecurityException("Invalid username or password"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Invalid username or password"));
     }
 }

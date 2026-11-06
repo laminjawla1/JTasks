@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.memberships;
+package com.jgroup.jtasks.workspaces.memberships;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface MembershipRepository extends JpaRepository<Membership, UUID> {
+public interface WorkspaceMembersRepository extends JpaRepository<WorkspaceMembership, UUID> {
 }

@@ -5,13 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
-
-import static java.lang.IO.println;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +30,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody UserUpdate request) {
-        return ResponseEntity.ok(userService.update(id, request));
+    public ResponseEntity<UserResponse> update(@AuthenticationPrincipal User user, @Valid @RequestBody UserUpdate request) {
+        return ResponseEntity.ok(userService.update(user.getId(), request));
     }
 }

@@ -15,17 +15,6 @@ CREATE INDEX idx_users_email ON users (email);
 CREATE INDEX idx_users_status ON users (status);
 
 
-CREATE TABLE roles (
-    id UUID NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-    CONSTRAINT pk_roles_id PRIMARY KEY (id),
-    CONSTRAINT uq_roles_name UNIQUE (name)
-);
-
-
 CREATE TABLE workspaces (
     id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -37,6 +26,51 @@ CREATE TABLE workspaces (
     CONSTRAINT pk_workspaces_id PRIMARY KEY (id),
     CONSTRAINT uq_workspaces_name UNIQUE (name),
     CONSTRAINT uq_workspaces_slug UNIQUE (name)
+);
+
+
+CREATE TABLE workspace_memberships (
+    id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    workspace_id UUID NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVITE',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_workspace_memberships_user_id ON workspace_memberships (user_id);
+CREATE INDEX idx_workspace_memberships_workspace_id ON workspace_memberships (workspace_id);
+CREATE INDEX idx_workspace_memberships_status ON workspace_memberships (status);
+
+
+CREATE TABLE privileges (
+    id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_privileges_id PRIMARY KEY (id),
+    CONSTRAINT uq_privileges_name UNIQUE (name)
+);
+
+
+CREATE TABLE roles (
+    id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    workspace_id UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_roles_id PRIMARY KEY (id),
+    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
+    CONSTRAINT uq_roles_name UNIQUE (name)
+);
+
+
+CREATE TABLE role_privileges (
+    role_id UUID NOT NULL,
+    privilege_id UUID NOT NULL,
+
+    CONSTRAINT pk_role_privileges PRIMARY KEY (role_id, privilege_id)
 );
 
 
@@ -55,9 +89,25 @@ CREATE TABLE projects (
     CONSTRAINT fk_projects_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
     CONSTRAINT fk_projects_lead_id FOREIGN KEY (lead_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 CREATE INDEX idx_projects_workspace_id ON projects (workspace_id);
 CREATE INDEX idx_projects_lead_id ON projects (lead_id);
+CREATE INDEX idx_projects_status ON projects (status);
+
+
+CREATE TABLE project_memberships (
+    id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    project_id UUID NOT NULL,
+    workspace_id UUID NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVITE',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_project_memberships_user_id ON project_memberships (user_id);
+CREATE INDEX idx_project_memberships_project_id ON project_memberships (project_id);
+CREATE INDEX idx_project_memberships_workspace_id ON project_memberships (workspace_id);
+CREATE INDEX idx_project_memberships_status ON project_memberships (status);
+
 
 CREATE TABLE boards (
     id UUID NOT NULL,
@@ -104,29 +154,9 @@ CREATE TABLE task_assignees (
 );
 
 
-CREATE TABLE memberships (
-    id UUID NOT NULL,
-    user_id UUID NOT NULL,
-    project_id UUID NOT NULL,
-    workspace_id UUID NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVITE',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-    CONSTRAINT pk_memberships PRIMARY KEY (id),
-    CONSTRAINT fk_memberships_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT fk_memberships_project_id FOREIGN KEY (project_id) REFERENCES projects ON DELETE CASCADE,
-    CONSTRAINT fk_memberships_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces ON DELETE CASCADE
-);
-CREATE INDEX idx_memberships_user_id ON memberships (user_id);
-CREATE INDEX idx_memberships_project_id ON memberships (project_id);
-CREATE INDEX idx_memberships_workspace_id ON memberships (workspace_id);
-CREATE INDEX idx_memberships_status ON memberships (status);
-
-
-CREATE TABLE membership_roles (
+CREATE TABLE workspace_membership_roles (
   membership_id UUID NOT NULL,
   role_id UUID NOT NULL,
 
-  CONSTRAINT pk_membership_roles PRIMARY KEY (membership_id, role_id)
+  CONSTRAINT pk_workspace_membership_roles PRIMARY KEY (membership_id, role_id)
 );

@@ -25,5 +25,8 @@ public record UserRequest(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
         message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special symbol."
     )
-    String password
+    String password,
+
+    @NotBlank
+    @Size(min = 3, max = 100) String workspaceName
 ) { }

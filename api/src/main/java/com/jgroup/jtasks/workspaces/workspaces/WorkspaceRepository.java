@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.workspaces;
+package com.jgroup.jtasks.workspaces.workspaces;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

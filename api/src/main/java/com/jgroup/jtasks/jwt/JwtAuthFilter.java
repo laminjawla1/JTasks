@@ -13,6 +13,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -38,8 +39,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 var authorities = roles.stream().map(r -> new SimpleGrantedAuthority(r.toString())).toList();
                 SecurityContextHolder.getContext()
                         .setAuthentication(UsernamePasswordAuthenticationToken.authenticated(user, null, authorities));
-            } catch (JwtException | IllegalArgumentException e) {
-                log.error("ERROR:", e);
+            } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                res.setContentType("application/json");
+                res.getWriter().write("""
+                        { "message": "Invalid or expired token" }
+                """);
             }
         }
         chain.doFilter(req, res);

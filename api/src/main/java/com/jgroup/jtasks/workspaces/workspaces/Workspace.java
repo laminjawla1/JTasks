@@ -1,14 +1,14 @@
-package com.jgroup.jtasks.workspaces;
+package com.jgroup.jtasks.workspaces.workspaces;
 
 import com.jgroup.jtasks.commons.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name="workspaces")
-@EqualsAndHashCode(callSuper = true)
 public class Workspace extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -21,6 +21,6 @@ public class Workspace extends BaseEntity {
     private Status status;
 
     public WorkspaceResponse response() {
-        return new WorkspaceResponse(getId(), name, status, getCreatedAt(), getUpdatedAt());
+        return new WorkspaceResponse(getId(), name, slug, status, getCreatedAt(), getUpdatedAt());
     }
 }

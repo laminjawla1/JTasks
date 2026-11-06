@@ -5,18 +5,16 @@ import com.jgroup.jtasks.projects.boards.Board;
 import com.jgroup.jtasks.projects.projects.Project;
 import com.jgroup.jtasks.users.User;
 import jakarta.persistence.*;
-import lombok.Cleanup;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Table(name="tasks")
-@EqualsAndHashCode(callSuper = true)
 public class Task extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })

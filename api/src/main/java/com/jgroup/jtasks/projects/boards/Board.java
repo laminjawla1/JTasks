@@ -3,13 +3,13 @@ package com.jgroup.jtasks.projects.boards;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.projects.projects.Project;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "boards")
-@EqualsAndHashCode(callSuper = true)
 public class Board extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")

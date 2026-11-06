@@ -2,17 +2,17 @@ package com.jgroup.jtasks.projects.projects;
 
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.users.User;
-import com.jgroup.jtasks.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.workspaces.Workspace;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Table(name="projects")
-@EqualsAndHashCode(callSuper = true)
 public class Project extends BaseEntity {
     @Column(nullable = false)
     private String name;

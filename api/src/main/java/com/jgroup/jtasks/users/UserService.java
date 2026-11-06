@@ -1,6 +1,8 @@
 package com.jgroup.jtasks.users;
 
 import com.jgroup.jtasks.jwt.JwtService;
+import com.jgroup.jtasks.workspaces.workspaces.WorkspaceRequest;
+import com.jgroup.jtasks.workspaces.workspaces.WorkspaceService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ public class UserService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final WorkspaceService workspaceService;
     private final AuthenticationManager authenticationManager;
 
     @Transactional
@@ -37,7 +40,9 @@ public class UserService {
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setStatus(Status.ACTIVE);
-        return userRepository.save(user).response();
+        user = userRepository.save(user);
+        var workspace = workspaceService.createWorkspace(user.getId(), new WorkspaceRequest(request.workspaceName()));
+        return user.response(workspace);
     }
 
     public LoginResponse login(@Valid LoginRequest req) {

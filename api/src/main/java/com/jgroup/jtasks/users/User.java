@@ -2,9 +2,10 @@ package com.jgroup.jtasks.users;
 
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.projects.tasks.Task;
+import com.jgroup.jtasks.workspaces.workspaces.WorkspaceResponse;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,10 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
-@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity implements UserDetails {
 
     @Column(nullable = false)
@@ -37,6 +38,10 @@ public class User extends BaseEntity implements UserDetails {
     @ManyToMany(mappedBy = "assignees", fetch = FetchType.LAZY)
     private Set<Task> tasks = new HashSet<>();
 
+    public UserResponse response(WorkspaceResponse workspace) {
+        return new UserResponse(getId(), firstName, lastName, email, status, getCreatedAt(), getUpdatedAt(), workspace);
+    }
+
     public UserResponse response() {
         return new UserResponse(getId(), firstName, lastName, email, status, getCreatedAt(), getUpdatedAt());
     }
@@ -47,6 +52,7 @@ public class User extends BaseEntity implements UserDetails {
     }
 
     @Override
+    @SuppressWarnings("NullableProblems")
     public String getUsername() {
         return email;
     }

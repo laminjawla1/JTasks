@@ -1,29 +1,25 @@
-package com.jgroup.jtasks.memberships;
+package com.jgroup.jtasks.workspaces.memberships;
 
-import com.jgroup.jtasks.roles.Role;
 import com.jgroup.jtasks.commons.BaseEntity;
-import com.jgroup.jtasks.projects.projects.Project;
-import com.jgroup.jtasks.workspaces.Workspace;
+import com.jgroup.jtasks.commons.MembershipStatus;
+import com.jgroup.jtasks.authorization.roles.Role;
 import com.jgroup.jtasks.users.User;
+import com.jgroup.jtasks.workspaces.workspaces.Workspace;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
 @Entity
-@Table(name = "memberships")
-@EqualsAndHashCode(callSuper = true)
-public class Membership extends BaseEntity {
+@Getter
+@Setter
+@Table(name = "workspace_memberships")
+public class WorkspaceMembership extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_id")
@@ -31,22 +27,22 @@ public class Membership extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
-            name = "membership_roles",
+            name = "workspace_membership_roles",
             joinColumns = @JoinColumn(name = "membership_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private MembershipStatus status;
 
     public void addRole(Role role) {
         this.roles.add(role);
-        role.getMemberships().add(this);
+        role.getMembers().add(this);
     }
 
     public void removeRole(Role role) {
         this.roles.remove(role);
-        role.getMemberships().remove(this);
+        role.getMembers().remove(this);
     }
 }
