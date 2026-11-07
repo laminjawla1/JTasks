@@ -94,19 +94,12 @@ CREATE INDEX idx_projects_lead_id ON projects (lead_id);
 CREATE INDEX idx_projects_status ON projects (status);
 
 
-CREATE TABLE project_memberships (
-    id UUID NOT NULL,
-    user_id UUID NOT NULL,
+CREATE TABLE project_members (
     project_id UUID NOT NULL,
-    workspace_id UUID NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVITE',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    member_id UUID NOT NULL,
+
+    CONSTRAINT pk_project_members PRIMARY KEY (project_id, member_id)
 );
-CREATE INDEX idx_project_memberships_user_id ON project_memberships (user_id);
-CREATE INDEX idx_project_memberships_project_id ON project_memberships (project_id);
-CREATE INDEX idx_project_memberships_workspace_id ON project_memberships (workspace_id);
-CREATE INDEX idx_project_memberships_status ON project_memberships (status);
 
 
 CREATE TABLE boards (

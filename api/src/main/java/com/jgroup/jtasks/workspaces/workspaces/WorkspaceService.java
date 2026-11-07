@@ -5,8 +5,10 @@ import com.jgroup.jtasks.authorization.privileges.PrivilegeRepository;
 import com.jgroup.jtasks.authorization.roles.DefaultRole;
 import com.jgroup.jtasks.authorization.roles.Role;
 import com.jgroup.jtasks.authorization.roles.RoleRepository;
+import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
+import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembersRepository;
 import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembership;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +27,11 @@ public class WorkspaceService {
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceMembersRepository workspaceMembersRepository;
 
     @Transactional
-    public WorkspaceResponse createWorkspace(UUID id, WorkspaceRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public WorkspaceResponse createWorkspace(UUID userId, WorkspaceRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Workspace workspace = new Workspace();
         workspace.setName(request.name());
@@ -46,6 +49,8 @@ public class WorkspaceService {
         membership.setUser(user);
         membership.setWorkspace(workspace);
         membership.addRole(role);
+        membership.setStatus(MembershipStatus.ACTIVE);
+        workspaceMembersRepository.save(membership);
         return workspaceRepository.save(workspace).response();
     }
 }

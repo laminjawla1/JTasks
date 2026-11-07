@@ -1,8 +1,5 @@
 package com.jgroup.jtasks.projects.projects;
 
-import com.jgroup.jtasks.commons.MembershipStatus;
-import com.jgroup.jtasks.projects.memberships.ProjectMembership;
-import com.jgroup.jtasks.projects.memberships.ProjectMembershipRepository;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
 import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembersRepository;
@@ -14,6 +11,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -21,12 +20,12 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMembersRepository workspaceMembersRepository;
-    private final ProjectMembershipRepository projectMembershipRepository;
 
     @Transactional
     public ProjectResponse createProject(User currentUser, String workspaceSlug, ProjectRequest request) {
         User user = userRepository
                 .findById(currentUser.getId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         Workspace workspace = workspaceRepository
                 .findBySlug(workspaceSlug).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
 
@@ -44,14 +43,15 @@ public class ProjectService {
         project.setStatus(Status.PENDING);
         project.setStartDate(request.startDate());
         project.setEndDate(request.endDate());
+        project.addMember(user);
+        project.addMember(lead);
         project = projectRepository.save(project);
-
-        ProjectMembership membership = new ProjectMembership();
-        membership.setUser(user);
-        membership.setProject(project);
-        membership.setWorkspace(workspace);
-        membership.setMembershipStatus(MembershipStatus.ACTIVE);
-        projectMembershipRepository.save(membership);
         return projectRepository.save(project).response();
+    }
+
+    @Transactional(readOnly = true)
+    public ProjectResponse getProject(User user, String workspaceSlug, UUID projectId) {
+        return projectRepository.findByIdWorkspaceSlugAndUserId(projectId, workspaceSlug, user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Project not found")).response();
     }
 }
