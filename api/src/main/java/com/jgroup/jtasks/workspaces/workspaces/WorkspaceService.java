@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +29,9 @@ public class WorkspaceService {
     private final WorkspaceMembersRepository workspaceMembersRepository;
 
     @Transactional
-    public WorkspaceResponse createWorkspace(UUID userId, WorkspaceRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public WorkspaceResponse createWorkspace(User currentUser, WorkspaceRequest request) {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Workspace workspace = new Workspace();
         workspace.setName(request.name());
