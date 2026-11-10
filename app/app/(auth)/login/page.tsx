@@ -1,37 +1,56 @@
 "use client";
 
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
+import Field from "@/components/auth/Field";
 
-const Login = () => {
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+
+type FormErrors = Record<string, string>;
+
+// Only allow same-site relative paths, so ?callbackUrl can't redirect to another site
+function getSafeRedirect(url: string | null) {
+  if (url && url.startsWith("/") && !url.startsWith("//")) return url;
+  return "/dashboard";
+}
+
+function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string> | null>(null);
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered") === "true";
+  const callbackUrl = getSafeRedirect(searchParams.get("callbackUrl"));
 
-  const handleLogin = async (e: React.SubmitEvent) => {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors({});
+  };
+
+  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!form.email || !form.password) {
       setErrors({
-        email: "Email is required",
-        password: "Password is required",
+        ...(!form.email && { email: "Email is required" }),
+        ...(!form.password && { password: "Password is required" }),
       });
       return;
     }
 
+    setLoading(true);
+    setErrors({});
+
     try {
-      const response = await fetch("http://localhost:8080/api/users/login", {
+      const response = await fetch(`${API_URL}/api/users/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
       if (response.ok) {
@@ -41,79 +60,107 @@ const Login = () => {
           secure: true,
           sameSite: "strict",
         });
-        router.push("/dashboard");
-      } else {
-        const data = await response.json();
-        setErrors(data.errors);
+        router.push(callbackUrl);
+        router.refresh();
+        return;
       }
-    } catch (e) {
-      console.log(e);
+
+      const data = await response.json().catch(() => null);
+      setErrors(
+        data?.errors ?? {
+          form:
+            response.status === 401
+              ? "Invalid email or password."
+              : (data?.message ?? "Login failed. Please try again."),
+        },
+      );
+    } catch {
+      setErrors({ form: "Could not reach the server. Please try again." });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const RenderErrors = ({ errors }: { errors: Record<string, string> }) => {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-        <ul className="list-disc list-inside">
-          {Object.values(errors).map((error) => (
-            <li key={error}>{error}</li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
+  const generalErrors = Object.entries(errors)
+    .filter(([key]) => key !== "email" && key !== "password")
+    .map(([, message]) => message);
+
   return (
-    <div className="flex flex-col items-center justify-center my-2 md:my-40">
-      {errors && <RenderErrors errors={errors} />}
-      <form onSubmit={handleLogin}>
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col">
-            <label htmlFor="email">Email</label>
-            <input
-              className="border-2 border-emerald-600"
-              id="email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setErrors(null);
-                setEmail(e.target.value);
-              }}
-            />
-          </div>
+    <>
+      <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
+      <p className="mt-2 text-sm text-slate-600">
+        Log in to pick up where your team left off.
+      </p>
 
-          <div className="flex flex-col">
-            <label htmlFor="password">Password</label>
-            <input
-              className="border-2 border-emerald-600"
-              id="password"
-              name="password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setErrors(null);
-                setPassword(e.target.value);
-              }}
-            />
-          </div>
-
-          <div className="text-center">
-            <button className="w-full bg-emerald-600 px-4 py-2 rounded-sm text-white">
-              Login
-            </button>
-          </div>
-
-          <div className="text-center">
-            Don't have an account? Register{" "}
-            <Link className="text-emerald-600" href="/register">
-              here
-            </Link>
-            .
-          </div>
+      {registered && (
+        <div
+          role="status"
+          className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+        >
+          Account created. Please log in.
         </div>
-      </form>
-    </div>
-  );
-};
+      )}
 
-export default Login;
+      {generalErrors.length > 0 && (
+        <div
+          role="alert"
+          className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          <ul className="list-inside list-disc">
+            {generalErrors.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-4">
+        <Field
+          label="Email"
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+          error={errors.email}
+          autoComplete="email"
+        />
+        <Field
+          label="Password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          error={errors.password}
+          autoComplete="current-password"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-slate-600">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-medium text-emerald-600 hover:text-emerald-500"
+        >
+          Register
+        </Link>
+      </p>
+    </>
+  );
+}
+
+// useSearchParams needs a Suspense boundary in the App Router
+export default function Login() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
