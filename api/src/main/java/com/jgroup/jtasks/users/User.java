@@ -3,7 +3,6 @@ package com.jgroup.jtasks.users;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.projects.projects.Project;
 import com.jgroup.jtasks.projects.tasks.Task;
-import com.jgroup.jtasks.workspaces.workspaces.WorkspaceResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,10 +40,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
     private Set<Project> projects;
-
-    public UserResponse response(WorkspaceResponse workspace) {
-        return new UserResponse(getId(), firstName, lastName, email, status, getCreatedAt(), getUpdatedAt(), workspace);
-    }
 
     public UserResponse response() {
         return new UserResponse(getId(), firstName, lastName, email, status, getCreatedAt(), getUpdatedAt());

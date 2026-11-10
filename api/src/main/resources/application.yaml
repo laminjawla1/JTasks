@@ -20,6 +20,11 @@ app:
     secret: ${JTASKS_JWT_SECRET}
     access-ttl: 1d
 
+  cors:
+    allowed-origins: ${JTASKS_ALLOWED_ORIGINS}
+    allowed-methods: ${JTASKS_ALLOWED_METHODS}
+    allowed-headers: ${JTASKS_ALLOWED_HEADERS}
+
 server:
   port: ${JTASKS_SERVER_PORT}
   servlet.context-path: /api
