@@ -1,10 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => {
+        setYear(new Date().getFullYear());
+      },
+      1000 * 60 * 60 * 24,
+    ); // Update every day
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand panel */}
@@ -26,7 +41,7 @@ export default function AuthLayout({
         <div className="relative">
           <h2 className="max-w-md text-4xl font-semibold tracking-tight">
             Plan work.{" "}
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
               Ship together.
             </span>
           </h2>
@@ -37,7 +52,7 @@ export default function AuthLayout({
         </div>
 
         <p className="relative text-sm text-slate-500">
-          © {new Date().getFullYear()} JTasks
+          © {year ?? 2026} JTasks
         </p>
       </aside>
 
