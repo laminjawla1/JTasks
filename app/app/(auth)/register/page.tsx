@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
 
 type FormErrors = Record<string, string>;
 
@@ -100,7 +100,7 @@ const Register = () => {
     try {
       const { confirmPassword: _confirm, ...payload } = form;
 
-      const response = await fetch(`${API_URL}/api/users/register`, {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
