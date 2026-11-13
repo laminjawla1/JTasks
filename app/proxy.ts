@@ -6,8 +6,9 @@ export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/register");
+  const isLandingRoute = path.startsWith("/");
 
-  if (!token && !isAuthRoute) {
+  if (!token && !isAuthRoute && !isLandingRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

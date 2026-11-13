@@ -3,7 +3,7 @@
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Navbar from "./Navbar";
+import Navbar from "../../components/Navbar";
 
 export default function DashboardLayout({
   children,
