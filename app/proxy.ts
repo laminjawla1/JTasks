@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
+  console.log("proxy middleware called");
   const token = request.cookies.get("auth_token")?.value;
   const path = request.nextUrl.pathname;
 
@@ -16,13 +17,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("Authorization", `Bearer ${token}`);
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return NextResponse.next();
 }
 
 export const config = {

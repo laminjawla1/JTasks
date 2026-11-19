@@ -3,10 +3,11 @@
 import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import Cookies from "js-cookie";
 import Field from "@/components/auth/Field";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
+import { userService } from "@/services/user";
+import { AuthUser, User } from "@/definitions";
+import { useMembershipStore, userAuthStore } from "@/store/store";
+import { UUID } from "crypto";
 
 type FormErrors = Record<string, string>;
 
@@ -21,6 +22,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "true";
   const callbackUrl = getSafeRedirect(searchParams.get("callbackUrl"));
+  const { login } = userAuthStore();
+  const { update } = useMembershipStore();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -30,6 +33,16 @@ function LoginForm() {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors({});
+  };
+
+  const fetchMemberships = async (userId: UUID, token: string) => {
+    try {
+      const response = await userService.getMemberships(userId, token);
+      const data = await response.json();
+      update(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -47,19 +60,12 @@ function LoginForm() {
     setErrors({});
 
     try {
-      const response = await fetch(`${API_URL}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const response = await userService.login(form);
 
       if (response.ok) {
-        const data = await response.json();
-        Cookies.set("auth_token", data.token, {
-          expires: 1,
-          secure: true,
-          sameSite: "strict",
-        });
+        const authUser: AuthUser = await response.json();
+        login(authUser.token, authUser as Omit<AuthUser, "token"> as User);
+        await fetchMemberships(authUser.id, authUser.token);
         router.push(callbackUrl);
         router.refresh();
         return;

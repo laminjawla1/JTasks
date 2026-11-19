@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const features = [
   {
@@ -75,6 +76,11 @@ const columns = [
 ];
 
 export default function Home() {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-lg">
@@ -295,7 +301,7 @@ export default function Home() {
 
       <footer className="border-t border-slate-200">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-slate-500 sm:flex-row">
-          <p>© {new Date().getFullYear()} JTasks. All rights reserved.</p>
+          <p>© {year || 2026} JTasks. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="#features" className="transition hover:text-slate-900">
               Features

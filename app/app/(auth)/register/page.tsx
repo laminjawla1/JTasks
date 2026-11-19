@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
+import { userService } from "@/services/user";
+import { User } from "@/definitions";
 
 type FormErrors = Record<string, string>;
 
@@ -100,11 +100,7 @@ const Register = () => {
     try {
       const { confirmPassword: _confirm, ...payload } = form;
 
-      const response = await fetch(`${API_URL}/users/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await userService.create(payload as User);
 
       if (response.ok) {
         router.push("/login?registered=true");
