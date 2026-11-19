@@ -27,7 +27,5 @@ export async function apiRequest(
     config.body = JSON.stringify(config.body)
   }
 
-  console.log(`Making API request to: ${BASE_URL}${endpoint}`)
-
   return await fetch(`${BASE_URL}${endpoint}`, config)
 }

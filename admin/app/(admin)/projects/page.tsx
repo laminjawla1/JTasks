@@ -1,4 +1,7 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -18,88 +21,107 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Field, FieldGroup } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Plus } from "lucide-react"
+import CreateProject from "./CreateProject"
+import { useEffect, useState } from "react"
+import { Project } from "@/definitions"
+import { useContextStore } from "@/store/contextStore"
+import { useMembershipStore } from "@/store/store"
+import { projectsService } from "@/services/projects"
+import { Badge } from "@/components/ui/badge"
 
 const Projects = () => {
+  const { memberships } = useMembershipStore()
+  const workspaces = memberships.map((m) => m.workspace)
+  const activeWorkspaceId = useContextStore((s) => s.activeWorkspaceId)
+  const workspace = workspaces.find((w) => w.id === activeWorkspaceId)
+  const [loading, setLoading] = useState(false)
+  const [createProject, setCreateProject] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true)
+      const response = await projectsService.getAll(workspace?.slug as string)
+      if (response.ok) {
+        const data = await response.json()
+        console.log(data)
+        setProjects(data)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
   return (
     <>
-      <Dialog>
-        <form>
-          <DialogTrigger
-            render={
-              <div className="mb-4 flex items-center justify-end">
-                <Button>
-                  {" "}
-                  <Plus />
-                  New Project
-                </Button>
-              </div>
-            }
-          />
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </DialogDescription>
-            </DialogHeader>
-            <FieldGroup>
-              <Field>
-                <Label htmlFor="name-1">Name</Label>
-                <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-              </Field>
-              <Field>
-                <Label htmlFor="username-1">Username</Label>
-                <Input
-                  id="username-1"
-                  name="username"
-                  defaultValue="@peduarte"
-                />
-              </Field>
-            </FieldGroup>
-            <DialogFooter>
-              <DialogClose render={<Button variant="outline">Cancel</Button>} />
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </form>
-      </Dialog>
+      {createProject && (
+        <CreateProject
+          open={createProject}
+          onCreate={() => {
+            setCreateProject(false)
+            fetchProjects()
+          }}
+        />
+      )}
 
-      <div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-25">Invoice</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Method</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">INV001</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Credit Card</TableCell>
-              <TableCell className="text-right">$250.00</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
+          <Button onClick={() => setCreateProject(true)}>
+            <Plus />
+            New Project
+          </Button>
+        </div>
 
-        <Pagination className="mt-4 flex items-center justify-end">
+        <Card className="gap-0 overflow-hidden py-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-25 pl-4">Name</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>End Date</TableHead>
+                <TableHead className="pr-4 text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projects.map((project) => (
+                <TableRow key={project.id}>
+                  <TableCell className="pl-4 font-medium">
+                    {project.name}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {project.startDate.toString()}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {project.endDate?.toString()}
+                  </TableCell>
+                  <TableCell className="pr-4 text-right">
+                    <Badge
+                      variant={
+                        project.status as
+                          | "PENDING"
+                          | "PROGRESS"
+                          | "SUSPENDED"
+                          | "COMPLETED"
+                          | "CANCELLED"
+                      }
+                    >
+                      {project.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+
+        <Pagination className="flex items-center justify-end">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious href="#" />
@@ -127,5 +149,4 @@ const Projects = () => {
     </>
   )
 }
-
 export default Projects

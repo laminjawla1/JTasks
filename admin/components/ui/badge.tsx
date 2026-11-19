@@ -18,6 +18,18 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+
+        // Project Status Variants
+        PENDING:
+          "bg-amber-500/10 text-amber-700 focus-visible:ring-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 [a]:hover:bg-amber-500/20",
+        PROGRESS:
+          "bg-blue-500/10 text-blue-700 focus-visible:ring-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 [a]:hover:bg-blue-500/20",
+        SUSPENDED:
+          "bg-orange-500/10 text-orange-700 focus-visible:ring-orange-500/20 dark:bg-orange-500/20 dark:text-orange-400 [a]:hover:bg-orange-500/20",
+        COMPLETED:
+          "bg-emerald-500/10 text-emerald-700 focus-visible:ring-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 [a]:hover:bg-emerald-500/20",
+        CANCELLED:
+          "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
       },
     },
     defaultVariants: {

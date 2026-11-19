@@ -5,11 +5,13 @@ import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.authorization.roles.Role;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.workspaces.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.workspaces.WorkspaceResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,5 +46,9 @@ public class WorkspaceMembership extends BaseEntity {
     public void removeRole(Role role) {
         this.roles.remove(role);
         role.getMembers().remove(this);
+    }
+
+    public WorkspaceMembershipResponse response() {
+        return new WorkspaceMembershipResponse(getId(), user.response(), workspace.response(), status);
     }
 }
