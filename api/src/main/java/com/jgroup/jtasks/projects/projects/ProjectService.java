@@ -2,7 +2,7 @@ package com.jgroup.jtasks.projects.projects;
 
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
-import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembersRepository;
+import com.jgroup.jtasks.workspaces.members.WorkspaceMemberRepository;
 import com.jgroup.jtasks.workspaces.workspaces.Workspace;
 import com.jgroup.jtasks.workspaces.workspaces.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -19,7 +20,7 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final WorkspaceRepository workspaceRepository;
-    private final WorkspaceMembersRepository workspaceMembersRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
     public ProjectResponse createProject(User currentUser, String workspaceSlug, ProjectRequest request) {
@@ -29,22 +30,22 @@ public class ProjectService {
         Workspace workspace = workspaceRepository
                 .findBySlug(workspaceSlug).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
 
-        workspaceMembersRepository
+        workspaceMemberRepository
                 .findByUserIdAndWorkspaceId(user.getId(), workspace.getId())
                 .orElseThrow(() -> new AccessDeniedException("You are not authorized to view this workspace."));
 
-        User lead = userRepository
-                .findById(request.leadId()).orElseThrow(() -> new EntityNotFoundException("Lead not a registered user"));
+        var member = workspaceMemberRepository.findById(request.leadId())
+                .orElseThrow(() -> new EntityNotFoundException("Lead not found"));
 
         Project project = new Project();
         project.setName(request.name());
         project.setWorkspace(workspace);
-        project.setLead(lead);
+        project.setLead(member.getUser());
         project.setStatus(Status.PENDING);
         project.setStartDate(request.startDate());
         project.setEndDate(request.endDate());
         project.addMember(user);
-        project.addMember(lead);
+        project.addMember(member.getUser());
         project = projectRepository.save(project);
         return projectRepository.save(project).response();
     }
@@ -53,5 +54,11 @@ public class ProjectService {
     public ProjectResponse getProject(User user, String workspaceSlug, UUID projectId) {
         return projectRepository.findByIdWorkspaceSlugAndUserId(projectId, workspaceSlug, user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Project not found")).response();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getAll(User currentUser, String workspaceSlug) {
+        return projectRepository.findAllByWorkspaceSlugAndMember(currentUser.getId(), workspaceSlug)
+                .stream().map(Project::response).toList();
     }
 }

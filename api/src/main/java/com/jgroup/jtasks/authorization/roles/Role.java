@@ -2,7 +2,7 @@ package com.jgroup.jtasks.authorization.roles;
 
 import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.commons.BaseEntity;
-import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembership;
+import com.jgroup.jtasks.workspaces.members.WorkspaceMember;
 import com.jgroup.jtasks.workspaces.workspaces.Workspace;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,9 +29,13 @@ public class Role extends BaseEntity {
     private Set<Privilege> privileges = new HashSet<>();
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    private Set<WorkspaceMembership> members = new HashSet<>();
+    private Set<WorkspaceMember> members = new HashSet<>();
 
     public Role(String name) {
         this.name = name;
+    }
+
+    public RoleResponse response() {
+        return new RoleResponse(getId(), name, getCreatedAt(), getUpdatedAt());
     }
 }

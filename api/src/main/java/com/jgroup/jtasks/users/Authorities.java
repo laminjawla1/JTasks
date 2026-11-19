@@ -1,4 +1,6 @@
 package com.jgroup.jtasks.users;
 
-public record Authorities() {
+import java.util.Set;
+
+public record Authorities(Set<String> roles, Set<String> privileges) {
 }

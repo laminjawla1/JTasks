@@ -8,8 +8,8 @@ import com.jgroup.jtasks.authorization.roles.RoleRepository;
 import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
-import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembersRepository;
-import com.jgroup.jtasks.workspaces.memberships.WorkspaceMembership;
+import com.jgroup.jtasks.workspaces.members.WorkspaceMemberRepository;
+import com.jgroup.jtasks.workspaces.members.WorkspaceMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class WorkspaceService {
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
     private final WorkspaceRepository workspaceRepository;
-    private final WorkspaceMembersRepository workspaceMembersRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
     public WorkspaceResponse createWorkspace(User currentUser, WorkspaceRequest request) {
@@ -45,12 +45,12 @@ public class WorkspaceService {
         role.setPrivileges(new HashSet<>(privilegeRepository.findAll()));
         role = roleRepository.save(role);
 
-        WorkspaceMembership membership = new WorkspaceMembership();
+        WorkspaceMember membership = new WorkspaceMember();
         membership.setUser(user);
         membership.setWorkspace(workspace);
         membership.addRole(role);
         membership.setStatus(MembershipStatus.ACTIVE);
-        workspaceMembersRepository.save(membership);
+        workspaceMemberRepository.save(membership);
         return workspaceRepository.save(workspace).response();
     }
 }

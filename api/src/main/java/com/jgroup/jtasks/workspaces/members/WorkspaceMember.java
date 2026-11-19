@@ -1,24 +1,22 @@
-package com.jgroup.jtasks.workspaces.memberships;
+package com.jgroup.jtasks.workspaces.members;
 
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.authorization.roles.Role;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.workspaces.workspaces.Workspace;
-import com.jgroup.jtasks.workspaces.workspaces.WorkspaceResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "workspace_memberships")
-public class WorkspaceMembership extends BaseEntity {
+public class WorkspaceMember extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -48,7 +46,14 @@ public class WorkspaceMembership extends BaseEntity {
         role.getMembers().remove(this);
     }
 
-    public WorkspaceMembershipResponse response() {
-        return new WorkspaceMembershipResponse(getId(), user.response(), workspace.response(), status);
+    public WorkspaceMemberResponse response() {
+        return new WorkspaceMemberResponse(
+                getId(),
+                user.response(),
+                roles.stream().map(Role::response).toList(),
+                status,
+                getCreatedAt(),
+                getUpdatedAt()
+        );
     }
 }
