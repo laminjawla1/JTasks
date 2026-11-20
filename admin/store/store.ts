@@ -1,9 +1,19 @@
 "use client"
 
 import { create } from "zustand"
-import { Membership, User } from "@/definitions"
+import { Membership, Project, User } from "@/definitions"
 import Cookies from "js-cookie"
-import { AuthStore, MembershipStore } from "./definitions"
+import { AuthStore, MembershipStore, ProjectStore } from "./definitions"
+
+export const useProjectsStore = create<ProjectStore>((set) => ({
+  projects: localStorage.getItem("projects")
+    ? (JSON.parse(localStorage.getItem("projects") || "[]") as Project[])
+    : [],
+  update: (projects: Project[]) => {
+    localStorage.setItem("projects", JSON.stringify(projects))
+    set({ projects })
+  },
+}))
 
 export const useMembershipStore = create<MembershipStore>((set) => ({
   memberships: localStorage.getItem("memberships")

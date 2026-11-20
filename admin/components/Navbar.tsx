@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { User } from "lucide-react"
-import { useMembershipStore, userAuthStore } from "@/store/store"
+import {
+  useMembershipStore,
+  useProjectsStore,
+  userAuthStore,
+} from "@/store/store"
 import { useContextStore } from "@/store/contextStore"
 import { useActiveWorkspaceId } from "@/hooks/useActiveWorkspaceId"
 import { UUID } from "crypto"
-import { workspaceService } from "@/services/workspaces"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +22,8 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { projectsService } from "@/services/projects"
+import { workspaceService } from "@/services/workspaces"
 
 type Project = { id: number | string; name: string }
 
@@ -31,7 +36,7 @@ const Navbar = () => {
   const storedProjectId = useContextStore((s) =>
     workspaceId ? s.projectByWorkspace[workspaceId] : undefined
   )
-  const [projects, setProjects] = useState<Project[] | null>(null)
+  const { projects, update } = useProjectsStore()
   const [loading, setLoading] = useState(false)
 
   const workspaces = memberships?.map((m) => m.workspace) ?? []
@@ -53,16 +58,21 @@ const Navbar = () => {
 
     let cancelled = false
     setLoading(true)
-    setProjects(null)
 
     ;(async () => {
       try {
+        if (projects && projects.length > 0) return
         const response = await workspaceService.getProjects(workspaceId)
+        console.log(response)
         if (!response.ok) {
           throw new Error(`Error fetching projects: ${response.statusText}`)
         }
         const data = await response.json()
-        if (!cancelled) setProjects(data)
+        if (!cancelled) {
+          console.log(data)
+          console.log(`Peojects fetched: ${data}`)
+          update(data)
+        }
       } catch (error) {
         console.error("Error fetching projects:", error)
       } finally {

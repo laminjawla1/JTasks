@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
-import { FormErrors } from "@/definitions"
+import { FormErrors, Project } from "@/definitions"
 import { WorkspaceMembership } from "@/services/memberships"
 import { projectsService } from "@/services/projects"
 import { workspaceService } from "@/services/workspaces"
@@ -44,7 +44,7 @@ export interface CreateProject {
 
 interface CreateProjectProps {
   open: boolean
-  onCreate: () => void
+  onCreate: (project: Project) => void
   render?: React.ReactElement
 }
 
@@ -95,16 +95,17 @@ const CreateProject = ({ open, onCreate }: CreateProjectProps) => {
         startDate: startDate as Date,
         endDate,
       }
-      const response = await projectsService.create(
-        workspace?.slug || "",
+      const response = await workspaceService.createProject(
+        activeWorkspaceId as UUID,
         payload
       )
       if (response.ok) {
+        const project = await response.json()
         toast.add({
           type: "success",
           description: "Project created successfully",
         })
-        onCreate?.()
+        onCreate?.(project)
       } else {
         const data = await response.json()
         if (data?.errors) setErrors(data.errors)
@@ -124,7 +125,7 @@ const CreateProject = ({ open, onCreate }: CreateProjectProps) => {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onCreate}>
+    <Dialog open={open} onOpenChange={() => onCreate}>
       <form>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>

@@ -1,4 +1,3 @@
-import { Project } from "@/definitions"
 import { apiRequest } from "../api"
 import { CreateProject } from "@/app/(admin)/projects/CreateProject"
 

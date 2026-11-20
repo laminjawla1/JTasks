@@ -26,7 +26,7 @@ import CreateProject from "./CreateProject"
 import { useEffect, useState } from "react"
 import { Project } from "@/definitions"
 import { useContextStore } from "@/store/contextStore"
-import { useMembershipStore } from "@/store/store"
+import { useMembershipStore, useProjectsStore } from "@/store/store"
 import { projectsService } from "@/services/projects"
 import { Badge } from "@/components/ui/badge"
 
@@ -35,37 +35,37 @@ const Projects = () => {
   const workspaces = memberships.map((m) => m.workspace)
   const activeWorkspaceId = useContextStore((s) => s.activeWorkspaceId)
   const workspace = workspaces.find((w) => w.id === activeWorkspaceId)
+  const { projects, update } = useProjectsStore()
   const [loading, setLoading] = useState(false)
   const [createProject, setCreateProject] = useState(false)
-  const [projects, setProjects] = useState<Project[]>([])
 
-  const fetchProjects = async () => {
-    try {
-      setLoading(true)
-      const response = await projectsService.getAll(workspace?.slug as string)
-      if (response.ok) {
-        const data = await response.json()
-        console.log(data)
-        setProjects(data)
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const fetchProjects = async () => {
+  //   try {
+  //     setLoading(true)
+  //     const response = await projectsService.getAll(workspace?.slug as string)
+  //     if (response.ok) {
+  //       const data = await response.json()
+  //       console.log(data)
+  //       setProjects(data)
+  //     }
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  useEffect(() => {
-    fetchProjects()
-  }, [])
+  // useEffect(() => {
+  //   fetchProjects()
+  // }, [])
   return (
     <>
       {createProject && (
         <CreateProject
           open={createProject}
-          onCreate={() => {
+          onCreate={(project: Project) => {
             setCreateProject(false)
-            fetchProjects()
+            update([project, ...projects])
           }}
         />
       )}
