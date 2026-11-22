@@ -1,6 +1,7 @@
 import { apiRequest } from "../api"
 import { UUID } from "crypto"
 import { CreateProject } from "@/app/(admin)/projects/CreateProject"
+import { CreateWorkspace } from "@/app/(admin)/workspaces/CreateWorkspace"
 
 export const workspaceService = {
   getProjects: (workspaceId: UUID) =>
@@ -17,9 +18,15 @@ export const workspaceService = {
       body: data as unknown as BodyInit,
     }),
 
-  createWorkspace: (data: { name: string; description: string }) =>
+  createWorkspace: (data: CreateWorkspace) =>
     apiRequest(`/workspaces`, {
       method: "POST",
+      body: data as unknown as BodyInit,
+    }),
+
+  updateWorkspace: (workspaceId: UUID, data: CreateWorkspace) =>
+    apiRequest(`/workspaces/${workspaceId}`, {
+      method: "PUT",
       body: data as unknown as BodyInit,
     }),
 }

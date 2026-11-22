@@ -28,9 +28,7 @@ import { useState } from "react"
 
 export interface CreateWorkspace {
   name: string
-  leadId: UUID
-  startDate: Date
-  endDate: Date | null
+  description: string
 }
 
 interface CreateWorkspaceProps {

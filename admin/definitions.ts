@@ -18,6 +18,7 @@ export interface AuthUser extends User {
 }
 
 export interface Workspace extends BaseEntity {
+  status: string
   name: string
   slug: string
   description: string

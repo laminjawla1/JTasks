@@ -7,7 +7,6 @@ import { Pencil, Plus } from "lucide-react"
 import {
   Card,
   CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -15,15 +14,28 @@ import {
 } from "@/components/ui/card"
 
 import { useWorkspaceStore } from "@/store/store"
+import UpdateWorkspace from "./UpdateWorkspace"
+import { Badge } from "@/components/ui/badge"
 
 const Workspaces = () => {
-  const { workspaces, update } = useWorkspaceStore()
+  const { workspaces } = useWorkspaceStore()
   const [createWorkspace, setCreateWorkspace] = useState(false)
+  const [updateWorkspace, setUpdateWorkspace] = useState<Workspace | null>(null)
+
+  const [openUpdateWorkspace, setOpenUpdateWorkspace] = useState(false)
 
   return (
     <>
       {createWorkspace && (
         <CreateWorkspace open={createWorkspace} setOpen={setCreateWorkspace} />
+      )}
+
+      {updateWorkspace && (
+        <UpdateWorkspace
+          workspace={updateWorkspace}
+          open={openUpdateWorkspace}
+          setOpen={setOpenUpdateWorkspace}
+        />
       )}
 
       <div className="space-y-6">
@@ -42,11 +54,18 @@ const Workspaces = () => {
                 <CardTitle>{workspace.name}</CardTitle>
                 <CardDescription>{workspace.description}</CardDescription>
                 <CardAction>
-                  <Pencil size={20} />
+                  <Pencil
+                    size={20}
+                    onClick={() => {
+                      setUpdateWorkspace(workspace)
+                      setOpenUpdateWorkspace(true)
+                    }}
+                  />
                 </CardAction>
               </CardHeader>
-              <CardFooter>
-                <p>{workspace.slug}</p>
+              <CardFooter className="flex items-center justify-between text-xs">
+                <p className="font-light italic">{workspace.slug}</p>
+                <Badge>{workspace.status}</Badge>
               </CardFooter>
             </Card>
           ))}
