@@ -32,7 +32,7 @@ export interface Role extends BaseEntity {
   privileges: Privilege[]
 }
 
-export interface Membership extends BaseEntity {
+export interface WorkspaceMember extends BaseEntity {
   user: User
   workspace: Workspace
   roles: Role[]

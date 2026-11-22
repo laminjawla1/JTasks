@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
 import { userAuthStore } from "@/store/store"
-import { useContextStore } from "@/store/contextStore"
 
 export default function Logout() {
   const router = useRouter()
@@ -15,7 +14,6 @@ export default function Logout() {
     logout()
     router.replace("/login")
     router.refresh()
-    useContextStore.getState().reset()
   }, [router])
 
   return (

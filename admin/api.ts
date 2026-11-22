@@ -1,6 +1,6 @@
 import Cookies from "js-cookie"
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
-const AUTH_TOKEN = Cookies.get("auth_token") || ""
 
 interface FetchOptions extends RequestInit {
   next?: NextFetchRequestConfig
@@ -12,10 +12,12 @@ export async function apiRequest(
 ): Promise<Response> {
   const { headers, ...customConfig } = options
 
+  const authToken = Cookies.get("auth_token") || ""
+
   const config: FetchOptions = {
     method: options.method || "GET",
     headers: {
-      Authorization: `Bearer ${AUTH_TOKEN}`,
+      ...(authToken && { Authorization: `Bearer ${authToken}` }),
       "Content-Type": "application/json",
       ...headers,
     },
@@ -27,5 +29,15 @@ export async function apiRequest(
     config.body = JSON.stringify(config.body)
   }
 
-  return await fetch(`${BASE_URL}${endpoint}`, config)
+  const response = await fetch(`${BASE_URL}${endpoint}`, config)
+
+  if (
+    response.status === 401 &&
+    typeof window !== "undefined" &&
+    !["/users/login", "/users/register"].includes(endpoint)
+  ) {
+    window.location.href = "/login"
+  }
+
+  return response
 }

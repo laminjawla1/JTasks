@@ -1,29 +1,48 @@
 "use client"
 
 import { create } from "zustand"
-import { Membership, Project, User } from "@/definitions"
+import { Project, User, Workspace, WorkspaceMember } from "@/definitions"
 import Cookies from "js-cookie"
-import { AuthStore, MembershipStore, ProjectStore } from "./definitions"
+import {
+  ActiveWorkspaceStore,
+  AuthStore,
+  ProjectStore,
+  WorkspaceMemberStore,
+  WorkspaceStore,
+} from "./definitions"
+import { persist } from "zustand/middleware"
 
-export const useProjectsStore = create<ProjectStore>((set) => ({
-  projects: localStorage.getItem("projects")
-    ? (JSON.parse(localStorage.getItem("projects") || "[]") as Project[])
-    : [],
-  update: (projects: Project[]) => {
-    localStorage.setItem("projects", JSON.stringify(projects))
-    set({ projects })
-  },
-}))
+export const useProjectsStore = create<ProjectStore>()(
+  persist(
+    (set) => ({
+      projects: [],
+      update: (projects: Project[]) => set({ projects }),
+    }),
+    { name: "projects" }
+  )
+)
 
-export const useMembershipStore = create<MembershipStore>((set) => ({
-  memberships: localStorage.getItem("memberships")
-    ? (JSON.parse(localStorage.getItem("memberships") || "[]") as Membership[])
-    : [],
-  update: (memberships: Membership[]) => {
-    localStorage.setItem("memberships", JSON.stringify(memberships))
-    set({ memberships })
-  },
-}))
+export const useActiveWorkspaceStore = create<ActiveWorkspaceStore>()(
+  persist(
+    (set) => ({
+      activeWorkspace: null,
+      setActiveWorkspace: (activeWorkspace: Workspace) =>
+        set({ activeWorkspace }),
+    }),
+    { name: "activeWorkspace" }
+  )
+)
+
+export const useWorkspaceStore = create<WorkspaceStore>()(
+  persist(
+    (set) => ({
+      workspaces: [],
+      update: (workspaces: Workspace[]) => set({ workspaces }),
+    }),
+    { name: "workspaces" }
+  )
+)
+
 
 export const userAuthStore = create<AuthStore>((set) => {
   const token = Cookies.get("auth_token") || null
@@ -55,6 +74,7 @@ export const userAuthStore = create<AuthStore>((set) => {
     logout: () => {
       Cookies.remove("user", { path: "/" })
       Cookies.remove("auth_token", { path: "/" })
+      localStorage.clear()
       set({ token: null, user: null })
     },
   }

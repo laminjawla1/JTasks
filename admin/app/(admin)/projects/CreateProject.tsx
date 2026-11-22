@@ -25,12 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
-import { FormErrors, Project } from "@/definitions"
-import { WorkspaceMembership } from "@/services/memberships"
-import { projectsService } from "@/services/projects"
+import { FormErrors, Project, WorkspaceMember } from "@/definitions"
 import { workspaceService } from "@/services/workspaces"
 import { useContextStore } from "@/store/contextStore"
-import { useMembershipStore } from "@/store/store"
+import { useWorkspaceStore } from "@/store/store"
 import { UUID } from "crypto"
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -49,8 +47,7 @@ interface CreateProjectProps {
 }
 
 const CreateProject = ({ open, onCreate }: CreateProjectProps) => {
-  const { memberships } = useMembershipStore()
-  const workspaces = memberships.map((m) => m.workspace)
+  const { workspaces } = useWorkspaceStore()
   const activeWorkspaceId = useContextStore((s) => s.activeWorkspaceId)
   const workspace = workspaces.find((w) => w.id == activeWorkspaceId)
 
@@ -71,7 +68,7 @@ const CreateProject = ({ open, onCreate }: CreateProjectProps) => {
       if (!response.ok) return
       const members = await response.json()
       setUsers(
-        members.map((member: WorkspaceMembership) => ({
+        members.map((member: WorkspaceMember) => ({
           value: String(member.id),
           label: `${member.user.firstName} ${member.user.lastName}`,
         }))

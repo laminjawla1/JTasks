@@ -4,12 +4,12 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { User } from "lucide-react"
 import {
-  useMembershipStore,
+  useActiveWorkspaceStore,
   useProjectsStore,
   userAuthStore,
+  useWorkspaceStore,
 } from "@/store/store"
 import { useContextStore } from "@/store/contextStore"
-import { useActiveWorkspaceId } from "@/hooks/useActiveWorkspaceId"
 import { UUID } from "crypto"
 
 import { Button } from "@/components/ui/button"
@@ -22,30 +22,26 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { projectsService } from "@/services/projects"
 import { workspaceService } from "@/services/workspaces"
-
-type Project = { id: number | string; name: string }
+import { Workspace } from "@/definitions"
 
 const Navbar = () => {
   const user = userAuthStore((s) => s.user)
-  const memberships = useMembershipStore((s) => s.memberships)
-  const workspaceId = useActiveWorkspaceId()
-  const setWorkspace = useContextStore((s) => s.setWorkspace)
+  const { activeWorkspace, setActiveWorkspace } = useActiveWorkspaceStore()
   const setProject = useContextStore((s) => s.setProject)
   const storedProjectId = useContextStore((s) =>
-    workspaceId ? s.projectByWorkspace[workspaceId] : undefined
+    activeWorkspace ? s.projectByWorkspace[activeWorkspace.id] : undefined
   )
   const { projects, update } = useProjectsStore()
   const [loading, setLoading] = useState(false)
 
-  const workspaces = memberships?.map((m) => m.workspace) ?? []
-  const firstWorkspaceId = workspaces[0] ? workspaces[0].id : null
+  const { workspaces } = useWorkspaceStore()
+  const firstWorkspace = workspaces[0]
 
   // Default to the first workspace when nothing valid is selected
   useEffect(() => {
-    if (!workspaceId && firstWorkspaceId) setWorkspace(firstWorkspaceId)
-  }, [workspaceId, firstWorkspaceId, setWorkspace])
+    if (!activeWorkspace && firstWorkspace) setActiveWorkspace(firstWorkspace)
+  }, [activeWorkspace, firstWorkspace, setActiveWorkspace])
 
   const projectExists = !!projects?.some(
     (p) => String(p.id) === storedProjectId
@@ -54,7 +50,7 @@ const Navbar = () => {
 
   // Fetch projects whenever the active workspace changes
   useEffect(() => {
-    if (!workspaceId) return
+    if (!activeWorkspace) return
 
     let cancelled = false
     setLoading(true)
@@ -62,15 +58,12 @@ const Navbar = () => {
     ;(async () => {
       try {
         if (projects && projects.length > 0) return
-        const response = await workspaceService.getProjects(workspaceId)
-        console.log(response)
+        const response = await workspaceService.getProjects(activeWorkspace.id)
         if (!response.ok) {
           throw new Error(`Error fetching projects: ${response.statusText}`)
         }
         const data = await response.json()
         if (!cancelled) {
-          console.log(data)
-          console.log(`Peojects fetched: ${data}`)
           update(data)
         }
       } catch (error) {
@@ -83,14 +76,14 @@ const Navbar = () => {
     return () => {
       cancelled = true
     }
-  }, [workspaceId])
+  }, [activeWorkspace])
 
   // Forget a remembered project that no longer exists (deleted, access removed)
   useEffect(() => {
-    if (workspaceId && projects && storedProjectId && !projectExists) {
-      setProject(workspaceId, null)
+    if (activeWorkspace && projects && storedProjectId && !projectExists) {
+      setProject(activeWorkspace.id, null)
     }
-  }, [workspaceId, projects, storedProjectId, projectExists, setProject])
+  }, [activeWorkspace, projects, storedProjectId, projectExists, setProject])
 
   // Base UI's Select needs value -> label pairs to show the selected name
   const workspaceItems = workspaces.map((w) => ({
@@ -108,8 +101,13 @@ const Navbar = () => {
 
         <Select
           items={workspaceItems}
-          value={workspaceId ? String(workspaceId) : null}
-          onValueChange={(value) => value && setWorkspace(value as UUID)}
+          value={activeWorkspace ? String(activeWorkspace.id) : null}
+          onValueChange={(value) =>
+            value &&
+            setActiveWorkspace(
+              workspaces.find((w) => w.id === value) as Workspace
+            )
+          }
         >
           <SelectTrigger aria-label="Workspace" className="min-w-40">
             <SelectValue placeholder="Select a workspace" />
@@ -123,7 +121,7 @@ const Navbar = () => {
           </SelectContent>
         </Select>
 
-        {workspaceId && (
+        {activeWorkspace && (
           <>
             <span aria-hidden className="text-muted-foreground">
               /
@@ -134,7 +132,7 @@ const Navbar = () => {
                 nativeButton={false}
                 render={
                   <Link
-                    href={`/projects?create=true&workspace=${workspaceId}`}
+                    href={`/projects?create=true&workspace=${activeWorkspace.id}`}
                   />
                 }
               >
@@ -146,7 +144,7 @@ const Navbar = () => {
                 value={projectId}
                 disabled={loading}
                 onValueChange={(value) =>
-                  value && setProject(workspaceId, value as UUID)
+                  value && setProject(activeWorkspace.id, value as UUID)
                 }
               >
                 <SelectTrigger aria-label="Project" className="min-w-40">

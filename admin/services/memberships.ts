@@ -1,11 +1,11 @@
-import { BaseEntity, Role, User, Workspace } from "@/definitions";
-import { apiRequest } from "../api";
+import { BaseEntity, Role, User, Workspace } from "@/definitions"
+import { apiRequest } from "../api"
 
-export interface WorkspaceMembership extends BaseEntity {
-  user: User;
-  workspace: Workspace;
-  roles: Role[];
-  status: string;
+export interface WorkspaceMember extends BaseEntity {
+  user: User
+  workspace: Workspace
+  roles: Role[]
+  status: string
 }
 
 export const membershipService = {
@@ -19,9 +19,9 @@ export const membershipService = {
       cache: "no-store", // Always fetch fresh data
     }),
 
-  create: (data: Omit<WorkspaceMembership, "id">) =>
+  create: (data: Omit<WorkspaceMember, "id">) =>
     apiRequest("/workspace-memberships", {
       method: "POST",
       body: data as unknown as BodyInit,
     }),
-};
+}

@@ -1,46 +1,45 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { UUID } from "crypto";
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { UUID } from "crypto"
 
-import { useMembershipStore } from "@/store/store";
-import { useContextStore } from "@/store/contextStore";
-import { useActiveWorkspaceId } from "@/hooks/useActiveWorkspaceId";
-import { dashboardService } from "@/services/dashboard";
+import { useActiveWorkspaceStore, useWorkspaceStore } from "@/store/store"
+import { useContextStore } from "@/store/contextStore"
+import { dashboardService } from "@/services/dashboard"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 type ProjectSummary = {
-  id: UUID;
-  name: string;
-  description?: string | null;
-  totalTasks: number;
-  completedTasks: number;
-  overdueTasks: number;
-  memberCount: number;
-  boards: { id: UUID; name: string; taskCount: number }[];
-};
+  id: UUID
+  name: string
+  description?: string | null
+  totalTasks: number
+  completedTasks: number
+  overdueTasks: number
+  memberCount: number
+  boards: { id: UUID; name: string; taskCount: number }[]
+}
 
 function Stat({
   label,
   value,
   danger = false,
 }: {
-  label: string;
-  value: number;
-  danger?: boolean;
+  label: string
+  value: number
+  danger?: boolean
 }) {
   return (
     <Card>
@@ -49,14 +48,14 @@ function Stat({
         <CardTitle
           className={cn(
             "text-3xl font-semibold tracking-tight",
-            danger && "text-destructive",
+            danger && "text-destructive"
           )}
         >
           {value}
         </CardTitle>
       </CardHeader>
     </Card>
-  );
+  )
 }
 
 function EmptyState({
@@ -64,9 +63,9 @@ function EmptyState({
   description,
   children,
 }: {
-  title: string;
-  description: string;
-  children?: React.ReactNode;
+  title: string
+  description: string
+  children?: React.ReactNode
 }) {
   return (
     <Card className="mx-auto mt-16 max-w-md border border-dashed text-center ring-0">
@@ -76,50 +75,50 @@ function EmptyState({
       </CardHeader>
       {children && <CardContent>{children}</CardContent>}
     </Card>
-  );
+  )
 }
 
 const Dashboard = () => {
-  const memberships = useMembershipStore((s) => s.memberships);
-  const workspaceId = useActiveWorkspaceId();
+  const { workspaces } = useWorkspaceStore()
+  const { activeWorkspace } = useActiveWorkspaceStore()
   const projectId = useContextStore((s) =>
-    workspaceId ? s.projectByWorkspace[workspaceId] : undefined,
-  );
-  const [summary, setSummary] = useState<ProjectSummary | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    activeWorkspace ? s.projectByWorkspace[activeWorkspace.id] : undefined
+  )
+  const [summary, setSummary] = useState<ProjectSummary | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Refetch whenever the selected project changes
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId) return
 
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setSummary(null);
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    setSummary(null)
 
-    (async () => {
+    ;(async () => {
       try {
-        const response = await dashboardService.getProjectSummary(projectId);
+        const response = await dashboardService.getProjectSummary(projectId)
         if (!response.ok) {
-          throw new Error(`Error fetching summary: ${response.statusText}`);
+          throw new Error(`Error fetching summary: ${response.statusText}`)
         }
-        const data = await response.json();
-        if (!cancelled) setSummary(data);
+        const data = await response.json()
+        if (!cancelled) setSummary(data)
       } catch (err) {
-        console.error("Error fetching dashboard summary:", err);
-        if (!cancelled) setError("Failed to load project summary.");
+        console.error("Error fetching dashboard summary:", err)
+        if (!cancelled) setError("Failed to load project summary.")
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
-    })();
+    })()
 
     return () => {
-      cancelled = true;
-    };
-  }, [projectId]);
+      cancelled = true
+    }
+  }, [projectId])
 
-  if (!memberships || memberships.length === 0) {
+  if (!workspaces || workspaces.length === 0) {
     return (
       <EmptyState
         title="No workspace yet"
@@ -132,7 +131,7 @@ const Dashboard = () => {
           Create a workspace
         </Button>
       </EmptyState>
-    );
+    )
   }
 
   if (!projectId) {
@@ -141,7 +140,7 @@ const Dashboard = () => {
         title="Select a project"
         description="Choose a project from the menu at the top to see its summary."
       />
-    );
+    )
   }
 
   // Also covers the first render, before the effect has started the fetch
@@ -155,7 +154,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !summary) {
@@ -165,12 +164,12 @@ const Dashboard = () => {
           Could not load this project{error ? `: ${error}` : "."}
         </AlertDescription>
       </Alert>
-    );
+    )
   }
 
   const percent = summary.totalTasks
     ? Math.round((summary.completedTasks / summary.totalTasks) * 100)
-    : 0;
+    : 0
 
   return (
     <div className="space-y-8">
@@ -218,7 +217,7 @@ const Dashboard = () => {
                 href={`/projects/${summary.id}/boards/${board.id}`}
                 className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <Card className="h-full transition hover:ring-primary/40 hover:shadow-lg hover:shadow-primary/5">
+                <Card className="h-full transition hover:shadow-lg hover:shadow-primary/5 hover:ring-primary/40">
                   <CardHeader>
                     <CardTitle>{board.name}</CardTitle>
                     <CardDescription>
@@ -233,7 +232,7 @@ const Dashboard = () => {
         )}
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

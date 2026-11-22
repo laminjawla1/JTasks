@@ -1,16 +1,17 @@
 "use client"
 
-import React, { Suspense, useState } from "react"
+import React, { Suspense, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { CircleCheck, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import Field from "@/components/auth/Field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { userService } from "@/services/user"
 import { AuthUser, User } from "@/definitions"
-import { useMembershipStore, userAuthStore } from "@/store/store"
-import { UUID } from "crypto"
+import { userAuthStore, useWorkspaceStore } from "@/store/store"
+import { workspaceService } from "@/services/workspaces"
+import { toast } from "@/components/ui/toast"
 
 type FormErrors = Record<string, string>
 
@@ -26,7 +27,7 @@ function LoginForm() {
   const registered = searchParams.get("registered") === "true"
   const callbackUrl = getSafeRedirect(searchParams.get("callbackUrl"))
   const { login } = userAuthStore()
-  const { update } = useMembershipStore()
+  const { update } = useWorkspaceStore()
 
   const [form, setForm] = useState({ email: "", password: "" })
   const [errors, setErrors] = useState<FormErrors>({})
@@ -38,13 +39,17 @@ function LoginForm() {
     setErrors({})
   }
 
-  const fetchMemberships = async (userId: UUID, token: string) => {
+  const fetchWorkspaces = async () => {
     try {
-      const response = await userService.getMemberships(userId, token)
+      setLoading(true)
+      const response = await workspaceService.getAll()
+      if (!response.ok) return []
       const data = await response.json()
       update(data)
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -68,7 +73,7 @@ function LoginForm() {
       if (response.ok) {
         const authUser: AuthUser = await response.json()
         login(authUser.token, authUser as Omit<AuthUser, "token"> as User)
-        await fetchMemberships(authUser.id, authUser.token)
+        await fetchWorkspaces()
         router.push(callbackUrl)
         router.refresh()
         return
@@ -94,19 +99,20 @@ function LoginForm() {
     .filter(([key]) => key !== "email" && key !== "password")
     .map(([, message]) => message)
 
+  useEffect(() => {
+    if (registered) {
+      toast.add({
+        type: "success",
+        description: "Account created. Please log in.",
+      })
+    }
+  }, [])
   return (
     <>
       <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Log in to pick up where your team left off.
       </p>
-
-      {registered && (
-        <Alert className="mt-6">
-          <CircleCheck />
-          <AlertDescription>Account created. Please log in.</AlertDescription>
-        </Alert>
-      )}
 
       {generalErrors.length > 0 && (
         <Alert variant="destructive" className="mt-6">
