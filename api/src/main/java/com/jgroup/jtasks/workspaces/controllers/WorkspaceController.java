@@ -22,7 +22,7 @@ public class WorkspaceController {
 
     @GetMapping
     public ResponseEntity<List<WorkspaceResponse>> getAll(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(workspaceService.get(currentUser));
+        return ResponseEntity.ok(workspaceService.getAll(currentUser));
     }
 
     @PostMapping

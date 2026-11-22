@@ -73,9 +73,12 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponse> get(User currentUser) {
-        return workspaceRepository.findAllByUser(currentUser.getId())
-                .stream().map(Workspace::response).toList();
+    public List<WorkspaceResponse> getAll(User currentUser) {
+        var user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return user.getMemberships().stream()
+                .map(WorkspaceMember::getWorkspace)
+                .map(Workspace::response).toList();
     }
 
     @Transactional
