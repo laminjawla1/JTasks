@@ -157,7 +157,7 @@ export default function Home() {
         <section className="relative overflow-hidden">
           <div
             aria-hidden
-            className="pointer-events-none absolute top-[-10rem] left-1/2 h-[32rem] w-[48rem] -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
+            className="pointer-events-none absolute -top-40 left-1/2 h-128 w-3xl -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
           />
 
           <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-20 text-center md:pt-28">
@@ -168,7 +168,7 @@ export default function Home() {
 
             <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">
               Plan work.{" "}
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
                 Ship together.
               </span>
             </h1>
@@ -312,7 +312,7 @@ export default function Home() {
 
         {/* CTA */}
         <section className="mx-auto max-w-6xl px-6 py-24">
-          <div className="rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-600 px-6 py-16 text-center text-white">
+          <div className="rounded-3xl bg-linear-to-br from-emerald-600 to-teal-600 px-6 py-16 text-center text-white">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Ready to get your team organised?
             </h2>
