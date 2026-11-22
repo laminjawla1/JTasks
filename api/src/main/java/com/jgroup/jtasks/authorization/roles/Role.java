@@ -2,8 +2,8 @@ package com.jgroup.jtasks.authorization.roles;
 
 import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.commons.BaseEntity;
-import com.jgroup.jtasks.workspaces.members.WorkspaceMember;
-import com.jgroup.jtasks.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.domains.WorkspaceMember;
+import com.jgroup.jtasks.workspaces.domains.Workspace;
 import jakarta.persistence.*;
 import lombok.*;
 

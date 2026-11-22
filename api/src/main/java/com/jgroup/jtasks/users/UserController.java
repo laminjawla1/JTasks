@@ -1,6 +1,6 @@
 package com.jgroup.jtasks.users;
 
-import com.jgroup.jtasks.workspaces.members.WorkspaceMemberResponse;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceMemberResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

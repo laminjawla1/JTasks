@@ -1,8 +1,8 @@
 package com.jgroup.jtasks.users;
 
 import com.jgroup.jtasks.commons.BaseEntity;
-import com.jgroup.jtasks.projects.projects.Project;
-import com.jgroup.jtasks.projects.tasks.Task;
+import com.jgroup.jtasks.projects.domains.Project;
+import com.jgroup.jtasks.projects.domains.Task;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

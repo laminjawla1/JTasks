@@ -1,0 +1,100 @@
+package com.jgroup.jtasks.workspaces.services;
+
+import com.jgroup.jtasks.authorization.privileges.Privilege;
+import com.jgroup.jtasks.authorization.privileges.PrivilegeRepository;
+import com.jgroup.jtasks.authorization.roles.*;
+import com.jgroup.jtasks.commons.MembershipStatus;
+import com.jgroup.jtasks.users.User;
+import com.jgroup.jtasks.users.UserRepository;
+import com.jgroup.jtasks.workspaces.enums.Status;
+import com.jgroup.jtasks.workspaces.domains.Workspace;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceRequest;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
+import com.jgroup.jtasks.workspaces.repositories.WorkspaceMemberRepository;
+import com.jgroup.jtasks.workspaces.domains.WorkspaceMember;
+import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class WorkspaceService {
+
+    private final RoleService roleService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PrivilegeRepository privilegeRepository;
+    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
+
+    @Transactional
+    public WorkspaceResponse create(User currentUser, WorkspaceRequest request) {
+        if (workspaceRepository.existsByName(request.name())) {
+            throw new IllegalArgumentException("Workspace already exists");
+        }
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Workspace workspace = new Workspace();
+        workspace.setName(request.name());
+        workspace.setDescription(request.description());
+        workspace.setSlug(slugify(request.name()));
+        workspace.setStatus(Status.ACTIVE);
+        workspace = workspaceRepository.save(workspace);
+
+        RoleResponse roleResponse = roleService.createRole(user, workspace.getId(),
+            new RoleRequest(
+                DefaultRole.SUPER_ADMIN.name(),
+                privilegeRepository.findAll().stream().map(Privilege::getId).collect(Collectors.toSet())
+            ));
+        Role role = roleRepository.findById(roleResponse.id()).orElse(new Role(DefaultRole.SUPER_ADMIN.name()));
+
+        WorkspaceMember membership = new WorkspaceMember();
+        membership.setUser(user);
+        membership.setWorkspace(workspace);
+        membership.addRole(role);
+        membership.setStatus(MembershipStatus.ACTIVE);
+        workspaceMemberRepository.save(membership);
+        return workspaceRepository.save(workspace).response();
+    }
+
+    private String slugify(String name) {
+        return name.toLowerCase().replaceAll("\\s", "-");
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceResponse> get(User currentUser) {
+        return workspaceRepository.findAllByUser(currentUser.getId())
+                .stream().map(Workspace::response).toList();
+    }
+
+    @Transactional
+    public WorkspaceResponse update(User currentUser, @Valid WorkspaceRequest request, UUID workspaceId) {
+        var workspace = workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("Workspace not found"));
+        workspace.setName(request.name());
+        workspace.setDescription(request.description());
+        return workspaceRepository.save(workspace).response();
+    }
+
+    @Transactional
+    public void delete(User currentUser, UUID workspaceId) {
+        var workspace = workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("Workspace not found"));
+        workspaceRepository.delete(workspace);
+    }
+
+    @Transactional(readOnly = true)
+    public WorkspaceResponse get(User currentUser, UUID workspaceId) {
+        return workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("Workspace not found"))
+                .response();
+    }
+}

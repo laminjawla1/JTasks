@@ -3,7 +3,7 @@ package com.jgroup.jtasks.authorization.roles;
 import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.authorization.privileges.PrivilegeRepository;
 import com.jgroup.jtasks.users.User;
-import com.jgroup.jtasks.workspaces.WorkspaceRepository;
+import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
