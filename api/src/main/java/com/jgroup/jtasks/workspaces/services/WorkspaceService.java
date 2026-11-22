@@ -49,19 +49,22 @@ public class WorkspaceService {
         workspace.setStatus(Status.ACTIVE);
         workspace = workspaceRepository.save(workspace);
 
+        WorkspaceMember member = new WorkspaceMember();
+        member.setUser(user);
+        member.setWorkspace(workspace);
+        member.setStatus(MembershipStatus.ACTIVE);
+        member = workspaceMemberRepository.save(member);
+
+        workspace.getMembers().add(member);
+
         RoleResponse roleResponse = roleService.createRole(user, workspace.getId(),
             new RoleRequest(
                 DefaultRole.SUPER_ADMIN.name(),
                 privilegeRepository.findAll().stream().map(Privilege::getId).collect(Collectors.toSet())
             ));
-        Role role = roleRepository.findById(roleResponse.id()).orElse(new Role(DefaultRole.SUPER_ADMIN.name()));
 
-        WorkspaceMember membership = new WorkspaceMember();
-        membership.setUser(user);
-        membership.setWorkspace(workspace);
-        membership.addRole(role);
-        membership.setStatus(MembershipStatus.ACTIVE);
-        workspaceMemberRepository.save(membership);
+        Role role = roleRepository.findById(roleResponse.id()).orElse(new Role(DefaultRole.SUPER_ADMIN.name()));
+        member.addRole(role);
         return workspaceRepository.save(workspace).response();
     }
 

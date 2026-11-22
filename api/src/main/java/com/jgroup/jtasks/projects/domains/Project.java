@@ -30,7 +30,7 @@ public class Project extends BaseEntity {
     private User lead;
 
     @Enumerated(EnumType.STRING)
-    private ProjectStatus projectStatus;
+    private ProjectStatus status;
 
     @Column(nullable = false)
     private LocalDate startDate;
@@ -47,7 +47,7 @@ public class Project extends BaseEntity {
 
     public ProjectResponse response() {
         return new ProjectResponse(
-            getId(), name, workspace.response(), lead.response(), projectStatus, startDate, endDate
+            getId(), name, workspace.response(), lead.response(), status, startDate, endDate
         );
     }
 

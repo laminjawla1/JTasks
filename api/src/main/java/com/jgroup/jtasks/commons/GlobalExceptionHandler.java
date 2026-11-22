@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -114,41 +113,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
-            DataIntegrityViolationException e, HttpServletRequest request) {
-        String message = "Data integrity violation";
-        String field = "dataIntegrity";
-        if (e.getMessage().contains("email")) {
-            message = "Email already exists";
-            field = "email";
-        }
-
-        ApiErrorResponse error = ApiErrorResponse.builder()
-                .status(HttpStatus.CONFLICT)
-                .errors(Map.of(field, message))
-                .path(request.getRequestURI())
-                .timestamp(Instant.now())
-                .build();
-
-        log.error("Error:", e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-    }
-
-//    @ExceptionHandler(MailAuthenticationException.class)
-//    public ResponseEntity<ApiErrorResponse> handleMailAuthenticationException(MailAuthenticationException e, HttpServletRequest request) {
-//        String message = "Unable to send email. Please contact support.";
-//        ApiErrorResponse error = ApiErrorResponse.builder()
-//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .errors(Map.of("message", message))
-//                .path(request.getRequestURI())
-//                .timestamp(LocalDateTime.now())
-//                .build();
-//        log.error("Error: {} - {}", e.getMessage(), e);
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-//    }
-
-    // Business-rule violations (e.g. "already approved"). The message is written for users, so it is returned as-is.
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalStateException(IllegalStateException e, HttpServletRequest request) {
         ApiErrorResponse response = ApiErrorResponse.builder()
@@ -161,7 +125,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
-    // Covers @PreAuthorize denials and access checks thrown from services.
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
         ApiErrorResponse response = ApiErrorResponse.builder()

@@ -28,13 +28,9 @@ public class Workspace extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(
-            name = "workspace_members",
-            joinColumns = @JoinColumn(name = "workspace_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkspaceMember> members = new HashSet<>();
+
 
     public WorkspaceResponse response() {
         return new WorkspaceResponse(getId(), name, description, slug, status, getCreatedAt(), getUpdatedAt());

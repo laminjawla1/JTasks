@@ -24,7 +24,7 @@ public class RoleService {
 
     @Transactional
     public RoleResponse createRole(User currentUser, UUID workspaceId, RoleRequest request) {
-        if (!roleRepository.existsByNameAndWorkspaceId(request.name(), workspaceId)) {
+        if (roleRepository.existsByNameAndWorkspaceId(request.name(), workspaceId)) {
             throw new EntityExistsException("Role already exists");
         }
 

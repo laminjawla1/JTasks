@@ -46,7 +46,7 @@ public class ProjectService {
         project.setName(request.name());
         project.setWorkspace(workspace);
         project.setLead(member.getUser());
-        project.setProjectStatus(ProjectStatus.PENDING);
+        project.setStatus(ProjectStatus.PENDING);
         project.setStartDate(request.startDate());
         project.setEndDate(request.endDate());
         project.addMember(user);

@@ -3,6 +3,7 @@ package com.jgroup.jtasks.users;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.projects.domains.Project;
 import com.jgroup.jtasks.projects.domains.Task;
+import com.jgroup.jtasks.workspaces.domains.WorkspaceMember;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<WorkspaceMember> memberships = new HashSet<>();
+
 
     @ManyToMany(mappedBy = "assignees", fetch = FetchType.LAZY)
     private Set<Task> tasks = new HashSet<>();
