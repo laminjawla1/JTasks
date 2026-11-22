@@ -57,7 +57,7 @@ const UpdateWorkspace = ({
           type: "success",
           description: "Workspace updated successfully",
         })
-        update([workspace, ...workspaces])
+        update([workspace, ...workspaces.filter((w) => w.id !== workspace.id)])
         setOpen(false)
       } else {
         const data = await response.json()
