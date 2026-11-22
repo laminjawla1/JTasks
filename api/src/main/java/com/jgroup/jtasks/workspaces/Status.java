@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.workspaces.workspaces;
+package com.jgroup.jtasks.workspaces;
 
 public enum Status {
     ACTIVE,

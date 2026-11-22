@@ -18,6 +18,7 @@ CREATE INDEX idx_users_status ON users (status);
 CREATE TABLE workspaces (
     id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     slug VARCHAR(255) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -27,9 +28,9 @@ CREATE TABLE workspaces (
     CONSTRAINT uq_workspaces_name UNIQUE (name),
     CONSTRAINT uq_workspaces_slug UNIQUE (name)
 );
+CREATE INDEX idx_workspaces_slug ON workspaces (slug);
 
-
-CREATE TABLE workspace_memberships (
+CREATE TABLE workspace_members (
     id UUID NOT NULL,
     user_id UUID NOT NULL,
     workspace_id UUID NOT NULL,
@@ -37,9 +38,9 @@ CREATE TABLE workspace_memberships (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_workspace_memberships_user_id ON workspace_memberships (user_id);
-CREATE INDEX idx_workspace_memberships_workspace_id ON workspace_memberships (workspace_id);
-CREATE INDEX idx_workspace_memberships_status ON workspace_memberships (status);
+CREATE INDEX idx_workspace_memberships_user_id ON workspace_members (user_id);
+CREATE INDEX idx_workspace_memberships_workspace_id ON workspace_members (workspace_id);
+CREATE INDEX idx_workspace_memberships_status ON workspace_members (status);
 
 
 CREATE TABLE privileges (
@@ -61,8 +62,7 @@ CREATE TABLE roles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_roles_id PRIMARY KEY (id),
-    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
-    CONSTRAINT uq_roles_name UNIQUE (name)
+    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
 );
 
 
@@ -147,9 +147,9 @@ CREATE TABLE task_assignees (
 );
 
 
-CREATE TABLE workspace_membership_roles (
-  membership_id UUID NOT NULL,
+CREATE TABLE workspace_members_roles (
+  member_id UUID NOT NULL,
   role_id UUID NOT NULL,
 
-  CONSTRAINT pk_workspace_membership_roles PRIMARY KEY (membership_id, role_id)
+  CONSTRAINT pk_workspace_membership_roles PRIMARY KEY (member_id, role_id)
 );

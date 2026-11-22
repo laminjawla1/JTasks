@@ -4,7 +4,7 @@ import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.authorization.roles.Role;
 import com.jgroup.jtasks.users.User;
-import com.jgroup.jtasks.workspaces.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.Workspace;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "workspace_memberships")
+@Table(name = "workspace_members")
 public class WorkspaceMember extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -27,8 +27,8 @@ public class WorkspaceMember extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
-            name = "workspace_membership_roles",
-            joinColumns = @JoinColumn(name = "membership_id"),
+            name = "workspace_members_roles",
+            joinColumns = @JoinColumn(name = "member_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
@@ -50,6 +50,7 @@ public class WorkspaceMember extends BaseEntity {
         return new WorkspaceMemberResponse(
                 getId(),
                 user.response(),
+                workspace.response(),
                 roles.stream().map(Role::response).toList(),
                 status,
                 getCreatedAt(),

@@ -6,7 +6,7 @@ import com.jgroup.jtasks.jwt.JwtService;
 import com.jgroup.jtasks.workspaces.members.WorkspaceMemberRepository;
 import com.jgroup.jtasks.workspaces.members.WorkspaceMember;
 import com.jgroup.jtasks.workspaces.members.WorkspaceMemberResponse;
-import com.jgroup.jtasks.workspaces.workspaces.WorkspaceRepository;
+import com.jgroup.jtasks.workspaces.WorkspaceRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;

@@ -23,8 +23,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
         SELECT project FROM Project project
         LEFT JOIN FETCH project.workspace workspace
         LEFT JOIN FETCH project.members member
-        WHERE workspace.slug = :workspaceSlug
-        AND member.id = :id
+        WHERE workspace.id = :workspaceId
+        AND member.id = :memberId
     """)
-    List<Project> findAllByWorkspaceSlugAndMember(UUID id, String workspaceSlug);
+    List<Project> findAllByWorkspaceAndMember(UUID workspaceId, UUID memberId);
 }

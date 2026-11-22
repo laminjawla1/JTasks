@@ -19,4 +19,8 @@ public class Board extends BaseEntity {
 
     @Column(name = "board_order")
     private Float order;
+
+    public BoardResponse response() {
+        return new BoardResponse(getId(), project.response(), name, order, getCreatedAt(), getUpdatedAt());
+    }
 }

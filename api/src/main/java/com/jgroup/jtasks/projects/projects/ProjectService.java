@@ -3,8 +3,8 @@ package com.jgroup.jtasks.projects.projects;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
 import com.jgroup.jtasks.workspaces.members.WorkspaceMemberRepository;
-import com.jgroup.jtasks.workspaces.workspaces.Workspace;
-import com.jgroup.jtasks.workspaces.workspaces.WorkspaceRepository;
+import com.jgroup.jtasks.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,12 +23,12 @@ public class ProjectService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
-    public ProjectResponse createProject(User currentUser, String workspaceSlug, ProjectRequest request) {
+    public ProjectResponse createProject(User currentUser, UUID workspaceId, ProjectRequest request) {
         User user = userRepository
                 .findById(currentUser.getId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Workspace workspace = workspaceRepository
-                .findBySlug(workspaceSlug).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
+                .findById(workspaceId).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
 
         workspaceMemberRepository
                 .findByUserIdAndWorkspaceId(user.getId(), workspace.getId())
@@ -57,8 +57,8 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectResponse> getAll(User currentUser, String workspaceSlug) {
-        return projectRepository.findAllByWorkspaceSlugAndMember(currentUser.getId(), workspaceSlug)
+    public List<ProjectResponse> getAll(User currentUser, UUID workspaceId) {
+        return projectRepository.findAllByWorkspaceAndMember(workspaceId, currentUser.getId())
                 .stream().map(Project::response).toList();
     }
 }

@@ -1,7 +1,7 @@
 package com.jgroup.jtasks.projects.projects;
 
 import com.jgroup.jtasks.users.UserResponse;
-import com.jgroup.jtasks.workspaces.workspaces.WorkspaceResponse;
+import com.jgroup.jtasks.workspaces.WorkspaceResponse;
 
 import java.time.LocalDate;
 import java.util.UUID;

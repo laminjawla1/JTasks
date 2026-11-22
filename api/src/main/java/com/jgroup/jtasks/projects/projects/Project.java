@@ -2,7 +2,7 @@ package com.jgroup.jtasks.projects.projects;
 
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.users.User;
-import com.jgroup.jtasks.workspaces.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.Workspace;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

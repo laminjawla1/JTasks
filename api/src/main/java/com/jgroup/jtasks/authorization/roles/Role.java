@@ -3,7 +3,7 @@ package com.jgroup.jtasks.authorization.roles;
 import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.workspaces.members.WorkspaceMember;
-import com.jgroup.jtasks.workspaces.workspaces.Workspace;
+import com.jgroup.jtasks.workspaces.Workspace;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "roles")
 public class Role extends BaseEntity {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
