@@ -1,6 +1,6 @@
 package com.jgroup.jtasks.workspaces.dto;
 
-import com.jgroup.jtasks.workspaces.enums.Status;
+import com.jgroup.jtasks.workspaces.enums.WorkspaceStatus;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,7 +10,7 @@ public record WorkspaceResponse(
         String name,
         String description,
         String slug,
-        Status status,
+        WorkspaceStatus status,
         Instant createdAt,
         Instant updatedAt
 ) { }

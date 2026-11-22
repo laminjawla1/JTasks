@@ -6,7 +6,7 @@ import com.jgroup.jtasks.authorization.roles.*;
 import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
-import com.jgroup.jtasks.workspaces.enums.Status;
+import com.jgroup.jtasks.workspaces.enums.WorkspaceStatus;
 import com.jgroup.jtasks.workspaces.domains.Workspace;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceRequest;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
@@ -46,7 +46,7 @@ public class WorkspaceService {
         workspace.setName(request.name());
         workspace.setDescription(request.description());
         workspace.setSlug(slugify(request.name()));
-        workspace.setStatus(Status.ACTIVE);
+        workspace.setStatus(WorkspaceStatus.ACTIVE);
         workspace = workspaceRepository.save(workspace);
 
         WorkspaceMember member = new WorkspaceMember();
@@ -86,6 +86,7 @@ public class WorkspaceService {
         var workspace = workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
                 .orElseThrow(() -> new EntityNotFoundException("Workspace not found"));
         workspace.setName(request.name());
+        workspace.setSlug(slugify(request.name()));
         workspace.setDescription(request.description());
         return workspaceRepository.save(workspace).response();
     }

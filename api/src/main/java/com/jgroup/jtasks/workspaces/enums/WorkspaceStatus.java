@@ -1,6 +1,6 @@
 package com.jgroup.jtasks.workspaces.enums;
 
-public enum Status {
+public enum WorkspaceStatus {
     ACTIVE,
     SUSPENDED,
     DISABLED

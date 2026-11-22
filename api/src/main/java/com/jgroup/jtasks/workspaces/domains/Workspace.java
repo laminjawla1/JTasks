@@ -1,7 +1,7 @@
 package com.jgroup.jtasks.workspaces.domains;
 
 import com.jgroup.jtasks.commons.BaseEntity;
-import com.jgroup.jtasks.workspaces.enums.Status;
+import com.jgroup.jtasks.workspaces.enums.WorkspaceStatus;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class Workspace extends BaseEntity {
     private String slug;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private WorkspaceStatus status;
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkspaceMember> members = new HashSet<>();

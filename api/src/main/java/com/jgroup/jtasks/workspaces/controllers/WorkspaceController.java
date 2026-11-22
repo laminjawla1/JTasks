@@ -3,6 +3,7 @@ package com.jgroup.jtasks.workspaces.controllers;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceRequest;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceUpdate;
 import com.jgroup.jtasks.workspaces.services.WorkspaceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
