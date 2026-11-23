@@ -8,6 +8,8 @@ import com.jgroup.jtasks.workspaces.dto.WorkspaceMemberResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,10 +27,10 @@ public class WorkspaceMember extends BaseEntity {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "workspace_members_roles",
-            joinColumns = @JoinColumn(name = "member_id"),
+            name = "workspace_member_roles",
+            joinColumns = @JoinColumn(name = "workspace_member_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();

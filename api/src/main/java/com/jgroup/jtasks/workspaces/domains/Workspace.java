@@ -31,7 +31,6 @@ public class Workspace extends BaseEntity {
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkspaceMember> members = new HashSet<>();
 
-
     public WorkspaceResponse response() {
         return new WorkspaceResponse(getId(), name, description, slug, status, getCreatedAt(), getUpdatedAt());
     }

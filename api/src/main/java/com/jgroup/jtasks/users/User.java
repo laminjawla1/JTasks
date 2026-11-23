@@ -44,7 +44,7 @@ public class User extends BaseEntity implements UserDetails {
     private Set<Task> tasks = new HashSet<>();
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
-    private Set<Project> projects;
+    private Set<Project> projects = new HashSet<>();
 
     public UserResponse response() {
         return new UserResponse(getId(), firstName, lastName, email, status, getCreatedAt(), getUpdatedAt());

@@ -36,7 +36,11 @@ CREATE TABLE workspace_members (
     workspace_id UUID NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING_INVITE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_workspace_members_id PRIMARY KEY (id),
+    CONSTRAINT fk_workspace_members_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_workspace_members_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces (id) ON DELETE CASCADE
 );
 CREATE INDEX idx_workspace_memberships_user_id ON workspace_members (user_id);
 CREATE INDEX idx_workspace_memberships_workspace_id ON workspace_members (workspace_id);
@@ -62,7 +66,7 @@ CREATE TABLE roles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_roles_id PRIMARY KEY (id),
-    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 
 
@@ -147,9 +151,11 @@ CREATE TABLE task_assignees (
 );
 
 
-CREATE TABLE workspace_members_roles (
-  member_id UUID NOT NULL,
-  role_id UUID NOT NULL,
+CREATE TABLE workspace_member_roles (
+    workspace_member_id UUID NOT NULL,
+    role_id UUID NOT NULL,
 
-  CONSTRAINT pk_workspace_membership_roles PRIMARY KEY (member_id, role_id)
+    CONSTRAINT pk_workspace_member_roles PRIMARY KEY (workspace_member_id, role_id),
+    CONSTRAINT fk_workspace_member_roles_workspace_member_id FOREIGN KEY (workspace_member_id) REFERENCES workspace_members (id) ON DELETE CASCADE,
+    CONSTRAINT fk_workspace_member_roles_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
 );
