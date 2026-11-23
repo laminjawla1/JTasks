@@ -1,5 +1,6 @@
 package com.jgroup.jtasks.projects.dto;
 
+import com.jgroup.jtasks.projects.enums.ProjectVisibility;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,5 +23,8 @@ public record ProjectRequest(
         LocalDate startDate,
 
         @FutureOrPresent
-        LocalDate endDate
+        LocalDate endDate,
+
+        @NotNull
+        ProjectVisibility visibility
 ) {}

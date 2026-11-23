@@ -12,7 +12,6 @@ import com.jgroup.jtasks.workspaces.domains.Workspace;
 import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,24 +32,21 @@ public class ProjectService {
                 .findById(currentUser.getId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Workspace workspace = workspaceRepository
-                .findById(workspaceId).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
+                .findByUserAndId(currentUser.getId(), workspaceId).orElseThrow(() -> new EntityNotFoundException("Workspace does not exist"));
 
-        workspaceMemberRepository
-                .findByUserIdAndWorkspaceId(user.getId(), workspace.getId())
-                .orElseThrow(() -> new AccessDeniedException("You are not authorized to view this workspace."));
-
-        var member = workspaceMemberRepository.findById(request.leadId())
+        var lead = workspaceMemberRepository.findById(request.leadId())
                 .orElseThrow(() -> new EntityNotFoundException("Lead not found"));
 
         Project project = new Project();
         project.setName(request.name());
         project.setWorkspace(workspace);
-        project.setLead(member.getUser());
+        project.setLead(lead.getUser());
         project.setStatus(ProjectStatus.PENDING);
+        project.setVisibility(request.visibility());
         project.setStartDate(request.startDate());
         project.setEndDate(request.endDate());
         project.addMember(user);
-        project.addMember(member.getUser());
+        project.addMember(lead.getUser());
         project = projectRepository.save(project);
         return projectRepository.save(project).response();
     }
