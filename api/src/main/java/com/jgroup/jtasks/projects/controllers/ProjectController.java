@@ -1,4 +1,4 @@
-package com.jgroup.jtasks.workspaces.controllers;
+package com.jgroup.jtasks.projects.controllers;
 
 import com.jgroup.jtasks.projects.dto.ProjectRequest;
 import com.jgroup.jtasks.projects.dto.ProjectResponse;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/workspaces/{workspaceId}/projects")
-public class WorkspaceProjectController {
+public class ProjectController {
 
     private final ProjectService projectService;
 
