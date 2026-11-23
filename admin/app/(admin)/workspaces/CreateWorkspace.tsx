@@ -80,17 +80,18 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-2xl">
-        <form onSubmit={createWorkspace}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={createWorkspace} className="grid gap-4">
           <DialogHeader>
-            <DialogTitle>Create Workspace</DialogTitle>
+            <DialogTitle>Create workspace</DialogTitle>
             <DialogDescription>
               Create a new workspace here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
 
+          {/* Only the fields scroll, so the header and footer always stay visible */}
           <div className="-mx-1 max-h-[60svh] overflow-y-auto px-1 py-1">
-            <FieldGroup className="grid gap-x-4 gap-y-5">
+            <FieldGroup className="gap-5">
               <Field data-invalid={!!errors.name}>
                 <FieldLabel htmlFor="name">Name</FieldLabel>
                 <Input
@@ -107,16 +108,22 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
               </Field>
 
               <Field data-invalid={!!errors.description}>
-                <FieldLabel htmlFor="description">Description</FieldLabel>
+                <FieldLabel htmlFor="description">
+                  Description{" "}
+                  <span className="font-normal text-muted-foreground">
+                    (optional)
+                  </span>
+                </FieldLabel>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Description (optional)"
+                  placeholder="What is this workspace for?"
+                  className="min-h-24 resize-none"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={loading}
                   aria-invalid={!!errors.description}
-                ></Textarea>
+                />
                 {errors.description && (
                   <FieldError>{errors.description}</FieldError>
                 )}
@@ -128,7 +135,7 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
             <Button disabled={loading} type="submit">
               {loading && <Loader2 className="animate-spin" />}
-              Save changes
+              Create workspace
             </Button>
           </DialogFooter>
         </form>

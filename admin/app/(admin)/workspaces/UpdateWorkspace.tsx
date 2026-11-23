@@ -65,7 +65,7 @@ const UpdateWorkspace = ({
         else {
           toast.add({
             type: "error",
-            description: data?.message || "Unable to create",
+            description: data?.message || "Unable to update",
             priority: "high",
           })
         }
@@ -79,17 +79,18 @@ const UpdateWorkspace = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-2xl">
-        <form onSubmit={updateWorkspace}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={updateWorkspace} className="grid gap-4">
           <DialogHeader>
-            <DialogTitle>Create Workspace</DialogTitle>
+            <DialogTitle>Update workspace</DialogTitle>
             <DialogDescription>
               Update a workspace here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
 
+          {/* Only the fields scroll, so the header and footer always stay visible */}
           <div className="-mx-1 max-h-[60svh] overflow-y-auto px-1 py-1">
-            <FieldGroup className="grid gap-x-4 gap-y-5">
+            <FieldGroup className="gap-5">
               <Field data-invalid={!!errors.name}>
                 <FieldLabel htmlFor="name">Name</FieldLabel>
                 <Input
@@ -106,16 +107,22 @@ const UpdateWorkspace = ({
               </Field>
 
               <Field data-invalid={!!errors.description}>
-                <FieldLabel htmlFor="description">Description</FieldLabel>
+                <FieldLabel htmlFor="description">
+                  Description{" "}
+                  <span className="font-normal text-muted-foreground">
+                    (optional)
+                  </span>
+                </FieldLabel>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Description (optional)"
+                  placeholder="What is this workspace for?"
+                  className="min-h-24 resize-none"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={loading}
                   aria-invalid={!!errors.description}
-                ></Textarea>
+                />
                 {errors.description && (
                   <FieldError>{errors.description}</FieldError>
                 )}

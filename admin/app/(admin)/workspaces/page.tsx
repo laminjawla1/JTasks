@@ -7,6 +7,7 @@ import { Loader2, Pencil, Plus, Trash } from "lucide-react"
 import {
   Card,
   CardAction,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -88,13 +89,15 @@ const Workspaces = () => {
           onOpenChange={setOpenDeleteWorkspace}
         >
           <DialogContent className="sm:max-w-md">
-            <form onSubmit={handleDeleteWorkspace}>
+            <form onSubmit={handleDeleteWorkspace} className="grid gap-4">
               <DialogHeader>
-                <DialogTitle>
-                  Delete Workspace ({deleteWorkspace.name})
-                </DialogTitle>
+                <DialogTitle>Delete workspace</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete this workspace
+                  Are you sure you want to delete{" "}
+                  <span className="font-medium text-foreground">
+                    {deleteWorkspace.name}
+                  </span>
+                  ? This action cannot be undone.
                 </DialogDescription>
               </DialogHeader>
 
@@ -121,44 +124,68 @@ const Workspaces = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {workspaces.map((workspace) => (
-            <Card key={workspace.id}>
+            <Card
+              key={workspace.id}
+              className="transition hover:shadow-lg hover:shadow-primary/5 hover:ring-primary/40"
+            >
               <CardHeader>
-                <CardTitle>{workspace.name}</CardTitle>
-                <CardDescription>{workspace.description}</CardDescription>
-                <CardAction className="flex items-center justify-between gap-2">
-                  <Pencil
-                    className="cursor-pointer"
-                    size={20}
+                <CardTitle className="truncate">{workspace.name}</CardTitle>
+                <CardDescription className="line-clamp-2 min-h-10">
+                  {workspace.description}
+                </CardDescription>
+                <CardAction className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Edit ${workspace.name}`}
                     onClick={() => {
                       setUpdateWorkspace(workspace)
                       setOpenUpdateWorkspace(true)
                     }}
-                  />
-                  <Trash
+                  >
+                    <Pencil />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Delete ${workspace.name}`}
+                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => {
                       setDeleteWorkspace(workspace)
                       setOpenDeleteWorkspace(true)
                     }}
-                    className="cursor-pointer hover:text-red-600"
-                  />
+                  >
+                    <Trash />
+                  </Button>
                 </CardAction>
               </CardHeader>
-              <CardFooter className="flex items-center justify-between text-xs">
-                <p className="font-light italic">{workspace.slug}</p>
+              <CardFooter className="flex items-center justify-between gap-2 text-xs">
+                <p className="truncate font-mono text-muted-foreground">
+                  {workspace.slug}
+                </p>
                 <Badge>{workspace.status}</Badge>
               </CardFooter>
             </Card>
           ))}
         </div>
+
         {workspaces.length === 0 && (
-          <div className="flex h-[50%] flex-col items-center justify-center">
-            <p>You don't have any workspaces. Please create one.</p>
-            <Button className="mt-2" onClick={() => setCreateWorkspace(true)}>
-              Create your first workspace
-            </Button>
-          </div>
+          <Card className="mx-auto mt-16 max-w-md border border-dashed text-center ring-0">
+            <CardHeader>
+              <CardTitle className="text-xl">No workspaces yet</CardTitle>
+              <CardDescription>
+                You don&apos;t have any workspaces. Please create one.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setCreateWorkspace(true)}>
+                <Plus />
+                Create your first workspace
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
     </>
