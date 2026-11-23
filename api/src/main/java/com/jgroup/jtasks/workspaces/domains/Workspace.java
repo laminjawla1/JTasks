@@ -3,6 +3,7 @@ package com.jgroup.jtasks.workspaces.domains;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.workspaces.enums.WorkspaceStatus;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
+import com.jgroup.jtasks.projects.enums.ProjectVisibility;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

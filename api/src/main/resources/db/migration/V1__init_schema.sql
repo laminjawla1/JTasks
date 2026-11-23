@@ -84,6 +84,7 @@ CREATE TABLE projects (
     workspace_id UUID NOT NULL,
     lead_id UUID NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    visibility VARCHAR(50) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     start_date DATE NOT NULL,
@@ -91,7 +92,8 @@ CREATE TABLE projects (
 
     CONSTRAINT pk_projects_id PRIMARY KEY (id),
     CONSTRAINT fk_projects_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    CONSTRAINT fk_projects_lead_id FOREIGN KEY (lead_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_projects_lead_id FOREIGN KEY (lead_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT ck_projects_visibility CHECK (visibility IN ('PUBLIC', 'PRIVATE'))
 );
 CREATE INDEX idx_projects_workspace_id ON projects (workspace_id);
 CREATE INDEX idx_projects_lead_id ON projects (lead_id);

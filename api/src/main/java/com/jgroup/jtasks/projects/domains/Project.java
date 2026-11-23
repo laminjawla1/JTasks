@@ -3,6 +3,7 @@ package com.jgroup.jtasks.projects.domains;
 import com.jgroup.jtasks.commons.BaseEntity;
 import com.jgroup.jtasks.projects.dto.ProjectResponse;
 import com.jgroup.jtasks.projects.enums.ProjectStatus;
+import com.jgroup.jtasks.projects.enums.ProjectVisibility;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.workspaces.domains.Workspace;
 import jakarta.persistence.*;
@@ -44,6 +45,9 @@ public class Project extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     private Set<User> members = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    private ProjectVisibility visibility;
 
     public ProjectResponse response() {
         return new ProjectResponse(
