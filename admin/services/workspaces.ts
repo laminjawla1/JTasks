@@ -29,4 +29,9 @@ export const workspaceService = {
       method: "PUT",
       body: data as unknown as BodyInit,
     }),
+
+  deleteWorkspace: (workspaceId: UUID) =>
+    apiRequest(`/workspaces/${workspaceId}`, {
+      method: "DELETE",
+    }),
 }

@@ -1,9 +1,9 @@
 "use client"
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 import CreateWorkspace from "./CreateWorkspace"
 import { Workspace } from "@/definitions"
 import { Button } from "@/components/ui/button"
-import { Pencil, Plus } from "lucide-react"
+import { Loader2, Pencil, Plus, Trash } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -12,17 +12,61 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 import { useWorkspaceStore } from "@/store/store"
 import UpdateWorkspace from "./UpdateWorkspace"
 import { Badge } from "@/components/ui/badge"
+import { workspaceService } from "@/services/workspaces"
+import { toast } from "@/components/ui/toast"
 
 const Workspaces = () => {
-  const { workspaces } = useWorkspaceStore()
+  const { workspaces, update } = useWorkspaceStore()
   const [createWorkspace, setCreateWorkspace] = useState(false)
   const [updateWorkspace, setUpdateWorkspace] = useState<Workspace | null>(null)
+  const [deleteWorkspace, setDeleteWorkspace] = useState<Workspace | null>(null)
 
   const [openUpdateWorkspace, setOpenUpdateWorkspace] = useState(false)
+  const [openDeleteWorkspace, setOpenDeleteWorkspace] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleDeleteWorkspace = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!deleteWorkspace) return
+    try {
+      setLoading(true)
+      const response = await workspaceService.deleteWorkspace(
+        deleteWorkspace.id
+      )
+      if (response.ok) {
+        update(workspaces.filter((w) => w.id !== deleteWorkspace.id))
+        setOpenDeleteWorkspace(false)
+        toast.add({
+          type: "success",
+          description: "Workspace deleted successfully",
+        })
+      } else {
+        const data = await response.json()
+        toast.add({
+          type: "error",
+          description: data?.message || "Unable to delete workspace",
+          priority: "high",
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
@@ -36,6 +80,36 @@ const Workspaces = () => {
           open={openUpdateWorkspace}
           setOpen={setOpenUpdateWorkspace}
         />
+      )}
+
+      {deleteWorkspace && (
+        <Dialog
+          open={openDeleteWorkspace}
+          onOpenChange={setOpenDeleteWorkspace}
+        >
+          <DialogContent className="sm:max-w-md">
+            <form onSubmit={handleDeleteWorkspace}>
+              <DialogHeader>
+                <DialogTitle>
+                  Delete Workspace ({deleteWorkspace.name})
+                </DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this workspace
+                </DialogDescription>
+              </DialogHeader>
+
+              <DialogFooter>
+                <DialogClose
+                  render={<Button variant="outline">Cancel</Button>}
+                />
+                <Button disabled={loading} type="submit" variant="destructive">
+                  {loading && <Loader2 className="animate-spin" />}
+                  Delete
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       )}
 
       <div className="space-y-6">
@@ -53,13 +127,21 @@ const Workspaces = () => {
               <CardHeader>
                 <CardTitle>{workspace.name}</CardTitle>
                 <CardDescription>{workspace.description}</CardDescription>
-                <CardAction>
+                <CardAction className="flex items-center justify-between gap-2">
                   <Pencil
+                    className="cursor-pointer"
                     size={20}
                     onClick={() => {
                       setUpdateWorkspace(workspace)
                       setOpenUpdateWorkspace(true)
                     }}
+                  />
+                  <Trash
+                    onClick={() => {
+                      setDeleteWorkspace(workspace)
+                      setOpenDeleteWorkspace(true)
+                    }}
+                    className="cursor-pointer hover:text-red-600"
                   />
                 </CardAction>
               </CardHeader>
