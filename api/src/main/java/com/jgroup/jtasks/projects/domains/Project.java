@@ -51,7 +51,7 @@ public class Project extends BaseEntity {
 
     public ProjectResponse response() {
         return new ProjectResponse(
-            getId(), name, workspace.response(), lead.response(), status, startDate, endDate
+            getId(), name, workspace.response(), lead.response(), status, visibility, startDate, endDate
         );
     }
 
