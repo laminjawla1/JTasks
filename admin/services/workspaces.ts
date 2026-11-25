@@ -9,8 +9,20 @@ export const workspaceService = {
 
   getAll: () => apiRequest(`/workspaces`),
 
-  getMembers: (workspaceId: UUID) =>
-    apiRequest(`/workspaces/${workspaceId}/members`),
+  getRoles: (workspaceId: UUID) =>
+    apiRequest(`/workspaces/${workspaceId}/roles`),
+
+  getSettings: (workspaceId: UUID) =>
+    apiRequest(`/workspaces/${workspaceId}/settings`),
+
+  getAuditLogs: (workspaceId: UUID) =>
+    apiRequest(`/workspaces/${workspaceId}/audit-logs`),
+
+  inviteMember: (workspaceId: UUID, data: CreateProject) =>
+    apiRequest(`/workspaces/${workspaceId}/projects`, {
+      method: "POST",
+      body: data as unknown as BodyInit,
+    }),
 
   createProject: (workspaceId: UUID, data: CreateProject) =>
     apiRequest(`/workspaces/${workspaceId}/projects`, {
@@ -24,6 +36,8 @@ export const workspaceService = {
       body: data as unknown as BodyInit,
     }),
 
+  get: (workspaceId: UUID) => apiRequest(`/workspaces/${workspaceId}`),
+
   updateWorkspace: (workspaceId: UUID, data: CreateWorkspace) =>
     apiRequest(`/workspaces/${workspaceId}`, {
       method: "PUT",
@@ -33,5 +47,11 @@ export const workspaceService = {
   deleteWorkspace: (workspaceId: UUID) =>
     apiRequest(`/workspaces/${workspaceId}`, {
       method: "DELETE",
+    }),
+
+  transferOwnership: (workspaceId: UUID, data: { memberId: UUID }) =>
+    apiRequest(`/workspaces/${workspaceId}/transfer`, {
+      method: "POST",
+      body: data as unknown as BodyInit,
     }),
 }

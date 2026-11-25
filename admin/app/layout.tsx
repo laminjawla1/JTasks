@@ -1,17 +1,22 @@
 "use client"
 
-import { Geist_Mono, Inter } from "next/font/google"
+import localFont from "next/font/local"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/layout/theme-provider"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = localFont({
+  src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+  variable: "--font-sans",
+  display: "swap",
+})
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
+const fontMono = localFont({
+  src: "../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2",
   variable: "--font-mono",
+  display: "swap",
 })
 
 export default function RootLayout({

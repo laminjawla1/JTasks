@@ -3,7 +3,7 @@ import { FormEvent, useState } from "react"
 import CreateWorkspace from "./CreateWorkspace"
 import { Workspace } from "@/definitions"
 import { Button } from "@/components/ui/button"
-import { Loader2, Pencil, Plus, Trash } from "lucide-react"
+import { Loader2, Pencil, Plus, Settings, Trash } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -28,8 +28,10 @@ import UpdateWorkspace from "./UpdateWorkspace"
 import { Badge } from "@/components/ui/badge"
 import { workspaceService } from "@/services/workspaces"
 import { toast } from "@/components/ui/toast"
+import { useRouter } from "next/navigation"
 
 const Workspaces = () => {
+  const router = useRouter()
   const { workspaces, update } = useWorkspaceStore()
   const [createWorkspace, setCreateWorkspace] = useState(false)
   const [updateWorkspace, setUpdateWorkspace] = useState<Workspace | null>(null)
@@ -128,38 +130,15 @@ const Workspaces = () => {
           {workspaces.map((workspace) => (
             <Card
               key={workspace.id}
-              className="transition hover:shadow-lg hover:shadow-primary/5 hover:ring-primary/40"
+              className="cursor-pointer transition hover:shadow-lg hover:shadow-primary/5 hover:ring-primary/40"
+              onClick={() => router.push(`/workspaces/${workspace.id}`)}
             >
               <CardHeader>
                 <CardTitle className="truncate">{workspace.name}</CardTitle>
                 <CardDescription className="line-clamp-2 min-h-10">
                   {workspace.description}
                 </CardDescription>
-                <CardAction className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Edit ${workspace.name}`}
-                    onClick={() => {
-                      setUpdateWorkspace(workspace)
-                      setOpenUpdateWorkspace(true)
-                    }}
-                  >
-                    <Pencil />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Delete ${workspace.name}`}
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => {
-                      setDeleteWorkspace(workspace)
-                      setOpenDeleteWorkspace(true)
-                    }}
-                  >
-                    <Trash />
-                  </Button>
-                </CardAction>
+                <CardAction className="flex items-center gap-1"></CardAction>
               </CardHeader>
               <CardFooter className="flex items-center justify-between gap-2 text-xs">
                 <p className="truncate font-mono text-muted-foreground">

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
-import Sidebar from "@/components/Sidebar"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
+import Sidebar from "@/components/layout/Sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { userAuthStore } from "@/store/store"
 
