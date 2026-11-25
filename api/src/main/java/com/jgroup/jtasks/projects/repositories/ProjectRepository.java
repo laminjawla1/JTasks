@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,12 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
         member.user.id = :userId
     """)
     Optional<Project> findByUserWorkspaceAndId(UUID userId, UUID workspaceId, UUID projectId);
+
+    @Query("""
+        SELECT project FROM Project project
+        LEFT JOIN FETCH project.workspace workspace
+        LEFT JOIN FETCH workspace.members member
+        WHERE workspace.id = :workspaceId AND member.user.id = :userId
+    """)
+    List<Project> findAllByUserAndWorkspace(UUID userId, UUID workspaceId);
 }

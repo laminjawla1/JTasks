@@ -1,8 +1,11 @@
 package com.jgroup.jtasks.workspaces.controllers;
 
+import com.jgroup.jtasks.auditlogs.AuditLogResponse;
 import com.jgroup.jtasks.users.User;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceMemberResponse;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceRequest;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceSettingResponse;
 import com.jgroup.jtasks.workspaces.services.WorkspaceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +44,7 @@ public class WorkspaceController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody WorkspaceRequest request,
             @PathVariable UUID workspaceId
-            ) {
+    ) {
         return ResponseEntity.ok(workspaceService.update(currentUser, request, workspaceId));
     }
 
@@ -49,5 +52,20 @@ public class WorkspaceController {
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User currentUser, @PathVariable UUID workspaceId) {
         workspaceService.delete(currentUser, workspaceId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{workspaceId}/members")
+    public ResponseEntity<List<WorkspaceMemberResponse>> getMembers(@AuthenticationPrincipal User currentUser, @PathVariable UUID workspaceId) {
+        return ResponseEntity.ok(workspaceService.getMembers(currentUser, workspaceId));
+    }
+
+    @GetMapping("/{workspaceId}/audit-logs")
+    public ResponseEntity<List<AuditLogResponse>> getAuditLogs(@AuthenticationPrincipal User currentUser, @PathVariable UUID workspaceId) {
+        return ResponseEntity.ok(workspaceService.getAuditLogs(currentUser, workspaceId));
+    }
+
+    @GetMapping("/{workspaceId}/settings")
+    public ResponseEntity<List<WorkspaceSettingResponse>> getSettings(@AuthenticationPrincipal User currentUser, @PathVariable UUID workspaceId) {
+        return ResponseEntity.ok(workspaceService.getSettings(currentUser, workspaceId));
     }
 }

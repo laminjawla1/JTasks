@@ -23,7 +23,7 @@ public class RoleService {
     private final PrivilegeRepository privilegeRepository;
 
     @Transactional
-    public RoleResponse createRole(User currentUser, UUID workspaceId, RoleRequest request) {
+    public RoleResponse create(User currentUser, UUID workspaceId, RoleRequest request) {
         if (roleRepository.existsByNameAndWorkspaceId(request.name(), workspaceId)) {
             throw new EntityExistsException("Role already exists");
         }
@@ -44,4 +44,11 @@ public class RoleService {
 
         return roleRepository.save(role).response();
     }
+
+    @Transactional(readOnly = true)
+    public List<RoleResponse> getAll(User currentUser, UUID workspaceId) {
+        return roleRepository.findAllByUserAndWorkspace(currentUser.getId(), workspaceId)
+                .stream().map(Role::response).toList();
+    }
+
 }

@@ -1,11 +1,14 @@
 package com.jgroup.jtasks.workspaces.services;
 
+import com.jgroup.jtasks.auditlogs.AuditLogResponse;
 import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.authorization.privileges.PrivilegeRepository;
 import com.jgroup.jtasks.authorization.roles.*;
 import com.jgroup.jtasks.commons.MembershipStatus;
 import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.users.UserRepository;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceMemberResponse;
+import com.jgroup.jtasks.workspaces.dto.WorkspaceSettingResponse;
 import com.jgroup.jtasks.workspaces.enums.WorkspaceStatus;
 import com.jgroup.jtasks.workspaces.domains.Workspace;
 import com.jgroup.jtasks.workspaces.dto.WorkspaceRequest;
@@ -16,6 +19,8 @@ import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,11 +62,11 @@ public class WorkspaceService {
 
         workspace.getMembers().add(member);
 
-        RoleResponse roleResponse = roleService.createRole(user, workspace.getId(),
-            new RoleRequest(
-                DefaultRole.SUPER_ADMIN.name(),
-                privilegeRepository.findAll().stream().map(Privilege::getId).collect(Collectors.toSet())
-            ));
+        RoleResponse roleResponse = roleService.create(user, workspace.getId(),
+                new RoleRequest(
+                        DefaultRole.SUPER_ADMIN.name(),
+                        privilegeRepository.findAll().stream().map(Privilege::getId).collect(Collectors.toSet())
+                ));
 
         Role role = roleRepository.findById(roleResponse.id()).orElse(new Role(DefaultRole.SUPER_ADMIN.name()));
         member.addRole(role);
@@ -103,5 +108,23 @@ public class WorkspaceService {
         return workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
                 .orElseThrow(() -> new EntityNotFoundException("Workspace not found"))
                 .response();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceMemberResponse> getMembers(User currentUser, UUID workspaceId) {
+        var user = userRepository.findById(currentUser.getId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        workspaceMemberRepository.findByUserIdAndWorkspaceId(user.getId(), workspaceId)
+                .orElseThrow(() -> new AccessDeniedException("You are not authorised to view this workspace"));
+        return workspaceMemberRepository.findAllByWorkspaceId(workspaceId, MembershipStatus.ACTIVE)
+                .stream().map(WorkspaceMember::response).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuditLogResponse> getAuditLogs(User currentUser, UUID workspaceId) {
+        return List.of(new AuditLogResponse());
+    }
+
+    public List<WorkspaceSettingResponse> getSettings(User currentUser, UUID workspaceId) {
+        return List.of(new WorkspaceSettingResponse());
     }
 }

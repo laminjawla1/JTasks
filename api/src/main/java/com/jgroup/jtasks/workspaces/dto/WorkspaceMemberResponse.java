@@ -12,7 +12,7 @@ public record WorkspaceMemberResponse(
         UUID id,
         UserResponse user,
         WorkspaceResponse workspace,
-        List<RoleResponse> role,
+        List<RoleResponse> roles,
         MembershipStatus status,
         Instant createdAt,
         Instant updatedAt

@@ -19,4 +19,8 @@ public class Privilege extends BaseEntity {
     private Privileges name;
 
     public Privilege(Privileges name) { this.name = name; }
+
+    public PrivilegeResponse response() {
+        return new PrivilegeResponse(getId(), name);
+    }
 }
