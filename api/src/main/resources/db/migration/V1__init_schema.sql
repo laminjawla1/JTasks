@@ -61,6 +61,7 @@ CREATE TABLE privileges (
 CREATE TABLE roles (
     id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
+    system_role BOOLEAN NOT NULL DEFAULT false,
     workspace_id UUID NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),

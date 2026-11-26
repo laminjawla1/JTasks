@@ -4,5 +4,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record RoleResponse(
-        UUID id,String name, Instant createdAt, Instant updatedAt) {
-}
+        UUID id,
+        String name,
+        Boolean isSystem,
+        Instant createdAt,
+        Instant updatedAt
+) { }

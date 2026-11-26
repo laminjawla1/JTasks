@@ -1,7 +1,6 @@
 package com.jgroup.jtasks.workspaces.services;
 
 import com.jgroup.jtasks.auditlogs.AuditLogResponse;
-import com.jgroup.jtasks.authorization.privileges.Privilege;
 import com.jgroup.jtasks.authorization.privileges.PrivilegeRepository;
 import com.jgroup.jtasks.authorization.roles.*;
 import com.jgroup.jtasks.commons.MembershipStatus;
@@ -26,13 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
 
-    private final RoleService roleService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
@@ -62,15 +59,22 @@ public class WorkspaceService {
 
         workspace.getMembers().add(member);
 
-        RoleResponse roleResponse = roleService.create(user, workspace.getId(),
-                new RoleRequest(
-                        DefaultRole.SUPER_ADMIN.name(),
-                        privilegeRepository.findAll().stream().map(Privilege::getId).collect(Collectors.toSet())
-                ));
+        seedDefaultWorkspaceRoles(workspace);
 
-        Role role = roleRepository.findById(roleResponse.id()).orElse(new Role(DefaultRole.SUPER_ADMIN.name()));
+        Role role = roleRepository.findByName(DefaultRole.OWNER.name())
+                .orElseThrow(() -> new EntityNotFoundException("Owner role not found"));
+
         member.addRole(role);
         return workspaceRepository.save(workspace).response();
+    }
+
+    private void seedDefaultWorkspaceRoles(Workspace workspace) {
+        for (DefaultRole role : DefaultRole.values()) {
+            Role obj = roleRepository.findByName(role.name()).orElseGet(Role::new);
+            obj.setWorkspace(workspace);
+            obj.setName(role.name());
+            obj.setPrivileges(privilegeRepository.findAllByNameIn(role.getPrivileges()));
+        }
     }
 
     private String slugify(String name) {

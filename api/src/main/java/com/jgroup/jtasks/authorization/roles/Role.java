@@ -23,6 +23,8 @@ public class Role extends BaseEntity {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
+    private Boolean systemRole;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
     @JoinTable(name = "role_privileges", joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "privilege_id"))
@@ -36,6 +38,6 @@ public class Role extends BaseEntity {
     }
 
     public RoleResponse response() {
-        return new RoleResponse(getId(), name, getCreatedAt(), getUpdatedAt());
+        return new RoleResponse(getId(), name, systemRole, getCreatedAt(), getUpdatedAt());
     }
 }

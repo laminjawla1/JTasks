@@ -3,9 +3,12 @@ package com.jgroup.jtasks.authorization.privileges;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
 public interface PrivilegeRepository extends JpaRepository<Privilege, UUID> {
     boolean existsByName(Privileges name);
+
+    Set<Privilege> findAllByNameIn(Set<Privileges> privileges);
 }
