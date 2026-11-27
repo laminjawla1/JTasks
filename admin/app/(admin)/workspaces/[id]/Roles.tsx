@@ -48,6 +48,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { authorizationService } from "@/services/authorization"
+import UpdateRole from "./UpdateRole"
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString()
 
@@ -55,10 +56,11 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [updateOpen, setUpdateOpen] = useState(false)
 
   const [deleting, setDeleting] = useState(false)
-  const [modifyRole, setModifyRole] = useState<Role | null>(null)
   const [deleteRole, setDeleteRole] = useState<Role | null>(null)
+  const [updateRole, setUpdateRole] = useState<Role | null>(null)
 
   const fetchRoles = async () => {
     if (!workspace) return
@@ -67,7 +69,6 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
       const response = await workspaceService.getRoles(workspace.id)
       if (response.ok) {
         const data = await response.json()
-        console.log(data)
         setRoles(data)
       }
     } catch (error) {
@@ -80,7 +81,6 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
     }
   }
 
-  // ASSUMPTION: adapt to your real remove-member endpoint
   const handleDeleteRole = async () => {
     if (!workspace || !deleteRole) return
     try {
@@ -100,7 +100,7 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
         const data = await response.json().catch(() => null)
         toast.add({
           type: "error",
-          description: data?.message || "Unable to remove member",
+          description: data?.message || "Unable to delete role",
           priority: "high",
         })
       }
@@ -111,7 +111,6 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
     }
   }
 
-  // Re-run when the workspace arrives (it is null on the first render)
   useEffect(() => {
     fetchRoles()
   }, [workspace?.id])
@@ -126,6 +125,19 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
           open={createOpen}
           setOpen={setCreateOpen}
           onCreated={fetchRoles}
+        />
+      )}
+
+      {updateOpen && (
+        <UpdateRole
+          workspaceId={workspace.id}
+          role={updateRole}
+          open={updateOpen}
+          setOpen={setUpdateOpen}
+          onUpdated={() => {
+            setUpdateRole(null)
+            fetchRoles()
+          }}
         />
       )}
 
@@ -235,10 +247,13 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => setModifyRole(role)}
+                                onClick={() => {
+                                  setUpdateRole(role)
+                                  setUpdateOpen(true)
+                                }}
                               >
                                 <ShieldCheck />
-                                Modify
+                                Update
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
