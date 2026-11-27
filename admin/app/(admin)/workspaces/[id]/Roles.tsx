@@ -1,7 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, ShieldCheck } from "lucide-react"
+import {
+  Loader2,
+  MoreHorizontal,
+  Plus,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,17 +27,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "@/components/ui/toast"
-import { Workspace } from "@/definitions"
+import { Role, Workspace } from "@/definitions"
 import { workspaceService } from "@/services/workspaces"
 import CreateRole from "./CreateRole"
-
-export type Role = {
-  id: string
-  name: string
-  createdAt: string
-  updatedAt: string
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { authorizationService } from "@/services/authorization"
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString()
 
@@ -40,6 +56,10 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
   const [loading, setLoading] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
 
+  const [deleting, setDeleting] = useState(false)
+  const [modifyRole, setModifyRole] = useState<Role | null>(null)
+  const [deleteRole, setDeleteRole] = useState<Role | null>(null)
+
   const fetchRoles = async () => {
     if (!workspace) return
     try {
@@ -47,6 +67,7 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
       const response = await workspaceService.getRoles(workspace.id)
       if (response.ok) {
         const data = await response.json()
+        console.log(data)
         setRoles(data)
       }
     } catch (error) {
@@ -56,6 +77,37 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  // ASSUMPTION: adapt to your real remove-member endpoint
+  const handleDeleteRole = async () => {
+    if (!workspace || !deleteRole) return
+    try {
+      setDeleting(true)
+      const response = await authorizationService.deleteRole(
+        workspace.id,
+        deleteRole.id
+      )
+      if (response.ok) {
+        setRoles((prev) => prev.filter((m) => m.id !== deleteRole.id))
+        setDeleteRole(null)
+        toast.add({
+          type: "success",
+          description: "Role removed successfully",
+        })
+      } else {
+        const data = await response.json().catch(() => null)
+        toast.add({
+          type: "error",
+          description: data?.message || "Unable to remove member",
+          priority: "high",
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -75,6 +127,37 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
           setOpen={setCreateOpen}
           onCreated={fetchRoles}
         />
+      )}
+
+      {deleteRole && (
+        <Dialog
+          open={!!deleteRole}
+          onOpenChange={(open) => !open && setDeleteRole(null)}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete role</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete{" "}
+                <span className="font-medium text-foreground">
+                  {deleteRole.name}
+                </span>{" "}
+                role? This action is not reversible.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose render={<Button variant="outline">Cancel</Button>} />
+              <Button
+                variant="destructive"
+                disabled={deleting}
+                onClick={handleDeleteRole}
+              >
+                {deleting && <Loader2 className="animate-spin" />}
+                Remove
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       <Card>
@@ -131,11 +214,44 @@ const Roles = ({ workspace }: { workspace: Workspace | null }) => {
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {formatDate(role.createdAt)}
+                        {formatDate(role.createdAt.toString())}
                       </TableCell>
-                      <TableCell className="pr-4 text-muted-foreground">
-                        {formatDate(role.updatedAt)}
+                      <TableCell className="t.toString()ext-muted-foreground pr-4">
+                        {formatDate(role.updatedAt.toString())}
                       </TableCell>
+                      {!role.systemRole && (
+                        <TableCell className="pr-4 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={`Actions for ${role.name}`}
+                                />
+                              }
+                            >
+                              <MoreHorizontal />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => setModifyRole(role)}
+                              >
+                                <ShieldCheck />
+                                Modify
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => setDeleteRole(role)}
+                              >
+                                <Trash2 />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}

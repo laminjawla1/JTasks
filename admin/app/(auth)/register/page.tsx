@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import React, { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Loader2 } from "lucide-react"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { userService } from "@/services/user";
-import { User } from "@/definitions";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { userService } from "@/services/users"
+import { User } from "@/definitions"
 
-type FormErrors = Record<string, string>;
+type FormErrors = Record<string, string>
 
 const FIELD_NAMES = [
   "firstName",
@@ -20,18 +20,18 @@ const FIELD_NAMES = [
   "email",
   "password",
   "confirmPassword",
-];
+]
 
 type FormFieldProps = {
-  label: string;
-  name: string;
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: string;
-  autoComplete?: string;
-  minLength?: number;
-};
+  label: string
+  name: string
+  type?: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  error?: string
+  autoComplete?: string
+  minLength?: number
+}
 
 function FormField({
   label,
@@ -59,68 +59,68 @@ function FormField({
       />
       {error && <FieldError>{error}</FieldError>}
     </Field>
-  );
+  )
 }
 
 const Register = () => {
-  const router = useRouter();
+  const router = useRouter()
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
+  })
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
     // Clear only the error for the field being edited
     setErrors((prev) => {
-      if (!prev[name] && !prev.form) return prev;
-      const { [name]: _removed, form: _form, ...rest } = prev;
-      return rest;
-    });
-  };
+      if (!prev[name] && !prev.form) return prev
+      const { [name]: _removed, form: _form, ...rest } = prev
+      return rest
+    })
+  }
 
   const register = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (form.password !== form.confirmPassword) {
-      setErrors({ confirmPassword: "Passwords do not match" });
-      return;
+      setErrors({ confirmPassword: "Passwords do not match" })
+      return
     }
 
-    setLoading(true);
-    setErrors({});
+    setLoading(true)
+    setErrors({})
 
     try {
-      const { confirmPassword: _confirm, ...payload } = form;
+      const { confirmPassword: _confirm, ...payload } = form
 
-      const response = await userService.create(payload as User);
+      const response = await userService.create(payload as User)
 
       if (response.ok) {
-        router.push("/login?registered=true");
-        return;
+        router.push("/login?registered=true")
+        return
       }
 
-      const data = await response.json().catch(() => null);
+      const data = await response.json().catch(() => null)
       setErrors(
-        data?.errors ?? { form: data?.message ?? "Registration failed." },
-      );
+        data?.errors ?? { form: data?.message ?? "Registration failed." }
+      )
     } catch {
-      setErrors({ form: "Could not reach the server. Please try again." });
+      setErrors({ form: "Could not reach the server. Please try again." })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Errors that don't belong to a specific input (e.g. "form" or unknown keys)
   const generalErrors = Object.entries(errors)
     .filter(([key]) => !FIELD_NAMES.includes(key))
-    .map(([, message]) => message);
+    .map(([, message]) => message)
 
   return (
     <>
@@ -195,7 +195,12 @@ const Register = () => {
           />
         </div>
 
-        <Button type="submit" size="lg" disabled={loading} className="mt-2 w-full">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="mt-2 w-full"
+        >
           {loading && <Loader2 className="animate-spin" />}
           {loading ? "Creating account..." : "Create account"}
         </Button>
@@ -211,7 +216,7 @@ const Register = () => {
         </Link>
       </p>
     </>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

@@ -30,6 +30,7 @@ interface Privilege extends BaseEntity {
 
 export interface Role extends BaseEntity {
   name: string
+  systemRole: boolean
   privileges: Privilege[]
 }
 

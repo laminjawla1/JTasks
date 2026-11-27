@@ -54,4 +54,9 @@ export const authorizationService = {
     apiRequest(`/workspaces/${workspaceId}`, {
       method: "DELETE",
     }),
+
+  deleteRole: (workspaceId: UUID, roleId: UUID) =>
+    apiRequest(`/workspaces/${workspaceId}/roles/${roleId}`, {
+      method: "DELETE",
+    }),
 }
