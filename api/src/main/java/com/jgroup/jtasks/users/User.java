@@ -80,4 +80,9 @@ public class User extends BaseEntity implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    public String log() {
+        String fullName = firstName + " " + lastName;
+        return "(%s - %s - %s)".formatted(getId(), fullName, email);
+    }
 }

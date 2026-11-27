@@ -13,7 +13,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @Table(name = "roles")
 public class Role extends BaseEntity {
     @Column(nullable = false)
@@ -25,17 +24,16 @@ public class Role extends BaseEntity {
 
     private Boolean systemRole;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
-    @JoinTable(name = "role_privileges", joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "privilege_id"))
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(
+            name = "role_privileges",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "privilege_id")
+    )
     private Set<Privilege> privileges = new HashSet<>();
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private Set<WorkspaceMember> members = new HashSet<>();
-
-    public Role(String name) {
-        this.name = name;
-    }
 
     public RoleResponse response() {
         return new RoleResponse(getId(), name, systemRole, getCreatedAt(), getUpdatedAt());

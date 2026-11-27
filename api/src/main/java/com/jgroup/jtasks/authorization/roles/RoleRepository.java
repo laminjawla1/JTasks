@@ -21,5 +21,5 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
     """)
     List<Role> findAllByUserAndWorkspace(UUID userId, UUID workspaceId);
 
-    Optional<Role> findByName(String name);
+    Optional<Role> findByNameAndWorkspaceId(String name, UUID workspaceId);
 }

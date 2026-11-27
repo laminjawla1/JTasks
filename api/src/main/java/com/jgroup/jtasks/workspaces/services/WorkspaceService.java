@@ -15,17 +15,21 @@ import com.jgroup.jtasks.workspaces.dto.WorkspaceResponse;
 import com.jgroup.jtasks.workspaces.repositories.WorkspaceMemberRepository;
 import com.jgroup.jtasks.workspaces.domains.WorkspaceMember;
 import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
@@ -38,9 +42,12 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse create(User currentUser, WorkspaceRequest request) {
+        log.info("Creating workspace '{}' for user {}", request.name(), currentUser.getId());
+
         if (workspaceRepository.existsByName(request.name())) {
-            throw new IllegalArgumentException("Workspace already exists");
+            throw new EntityExistsException("Workspace name already taken");
         }
+
         User user = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -61,20 +68,35 @@ public class WorkspaceService {
 
         seedDefaultWorkspaceRoles(workspace);
 
-        Role role = roleRepository.findByName(DefaultRole.OWNER.name())
-                .orElseThrow(() -> new EntityNotFoundException("Owner role not found"));
+        Role role = roleRepository.findByNameAndWorkspaceId(DefaultRole.OWNER.name(), workspace.getId())
+                .orElseThrow(() -> new EntityNotFoundException("OWNER role not found"));
 
         member.addRole(role);
-        return workspaceRepository.save(workspace).response();
+        workspace = workspaceRepository.save(workspace);
+
+        log.info("Workspace '{}' created successfully. Workspace ID: {}",
+                workspace.getName(), workspace.getId());
+        return workspace.response();
     }
 
+    @Transactional
     private void seedDefaultWorkspaceRoles(Workspace workspace) {
-        for (DefaultRole role : DefaultRole.values()) {
-            Role obj = roleRepository.findByName(role.name()).orElseGet(Role::new);
-            obj.setWorkspace(workspace);
-            obj.setName(role.name());
-            obj.setPrivileges(privilegeRepository.findAllByNameIn(role.getPrivileges()));
+        log.info("Seeding default roles for workspace: {}", workspace.getId());
+
+        List<Role> roles = new ArrayList<>();
+        for (DefaultRole defaultRole : DefaultRole.values()) {
+            log.info("Creating workspace role: {}", defaultRole);
+
+            Role role = new Role();
+            role.setWorkspace(workspace);
+            role.setName(defaultRole.name());
+            role.setSystemRole(defaultRole.isSystemRole());
+            role.setPrivileges(privilegeRepository.findAllByNameIn(defaultRole.getPrivileges()));
+            roles.add(role);
+            log.info("Done seeding: {}", role);
         }
+        roleRepository.saveAll(roles);
+        log.info("Seeded {} default roles for workspace {}", roles.size(), workspace.getId());
     }
 
     private String slugify(String name) {
@@ -94,6 +116,10 @@ public class WorkspaceService {
     public WorkspaceResponse update(User currentUser, @Valid WorkspaceRequest request, UUID workspaceId) {
         var workspace = workspaceRepository.findByUserAndId(currentUser.getId(), workspaceId)
                 .orElseThrow(() -> new EntityNotFoundException("Workspace not found"));
+
+        if (workspaceRepository.existsByName(request.name()) && !workspace.getName().equalsIgnoreCase(request.name())) {
+            throw new EntityExistsException("Workspace name already taken");
+        }
         workspace.setName(request.name());
         workspace.setSlug(slugify(request.name()));
         workspace.setDescription(request.description());

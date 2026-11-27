@@ -67,7 +67,8 @@ CREATE TABLE roles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_roles_id PRIMARY KEY (id),
-    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+    CONSTRAINT fk_roles_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    CONSTRAINT uq_name UNIQUE (name, workspace_id)
 );
 
 

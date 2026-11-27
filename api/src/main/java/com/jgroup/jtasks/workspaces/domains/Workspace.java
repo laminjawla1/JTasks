@@ -35,4 +35,8 @@ public class Workspace extends BaseEntity {
     public WorkspaceResponse response() {
         return new WorkspaceResponse(getId(), name, description, slug, status, getCreatedAt(), getUpdatedAt());
     }
+
+    public String log() {
+        return "(%s - %s - %s)".formatted(getId(), name, description);
+    }
 }
