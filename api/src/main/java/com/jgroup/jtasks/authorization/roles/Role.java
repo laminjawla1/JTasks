@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -36,6 +37,6 @@ public class Role extends BaseEntity {
     private Set<WorkspaceMember> members = new HashSet<>();
 
     public RoleResponse response() {
-        return new RoleResponse(getId(), name, systemRole, getCreatedAt(), getUpdatedAt());
+        return new RoleResponse(getId(), name, systemRole, privileges.stream().map(Privilege::response).collect(Collectors.toSet()), getCreatedAt(), getUpdatedAt());
     }
 }
