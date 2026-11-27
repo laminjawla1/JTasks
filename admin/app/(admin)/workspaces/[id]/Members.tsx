@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import {
   Loader2,
+  Lock,
   MoreHorizontal,
   Search,
   ShieldCheck,
@@ -60,6 +61,10 @@ const fullName = (member: WorkspaceMember) =>
 const initials = (member: WorkspaceMember) =>
   `${member.user.firstName?.[0] ?? ""}${member.user.lastName?.[0] ?? ""}`.toUpperCase()
 
+// Members holding a system role (e.g. the owner) can't be removed here
+const hasSystemRole = (member: WorkspaceMember) =>
+  !!member.roles?.some((r) => r.systemRole)
+
 const Members = ({ workspace }: { workspace: Workspace | null }) => {
   const [members, setMembers] = useState<WorkspaceMember[]>([])
   const [roles, setRoles] = useState<RoleOption[]>([])
@@ -97,7 +102,13 @@ const Members = ({ workspace }: { workspace: Workspace | null }) => {
       const response = await workspaceService.getRoles(workspace.id)
       if (response.ok) {
         const data = await response.json()
-        setRoles(data.map((r: RoleOption) => ({ id: r.id, name: r.name })))
+        setRoles(
+          data.map((r: RoleOption) => ({
+            id: r.id,
+            name: r.name,
+            systemRole: r.systemRole,
+          }))
+        )
       }
     } catch (error) {
       console.error(error)
@@ -290,6 +301,7 @@ const Members = ({ workspace }: { workspace: Workspace | null }) => {
                           {member.roles?.length ? (
                             member.roles.map((r) => (
                               <Badge key={r.id} variant="secondary">
+                                {r.systemRole && <Lock />}
                                 {r.name}
                               </Badge>
                             ))
@@ -330,11 +342,12 @@ const Members = ({ workspace }: { workspace: Workspace | null }) => {
                               onClick={() => setRoleTarget(member)}
                             >
                               <ShieldCheck />
-                              Change role
+                              Change roles
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               variant="destructive"
+                              disabled={hasSystemRole(member)}
                               onClick={() => setRemoveTarget(member)}
                             >
                               <Trash2 />

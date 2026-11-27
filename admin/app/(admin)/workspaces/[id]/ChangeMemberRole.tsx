@@ -12,25 +12,18 @@ import {
 } from "@/components/ui/dialog"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { FormErrors, WorkspaceMember } from "@/definitions"
-import { workspaceService } from "@/services/workspaces"
+import { workspaceMemberService } from "@/services/workspaceMembers"
 import { UUID } from "crypto"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
-import { RoleOption } from "./InviteMember"
-import { workspaceMemberService } from "@/services/workspaceMembers"
+import RoleMultiSelect, { RoleOption } from "./RoleMultiSelect"
 
 interface ChangeMemberRoleProps {
   workspaceId: UUID
@@ -50,13 +43,14 @@ const ChangeMemberRole = ({
   onUpdated,
 }: ChangeMemberRoleProps) => {
   const [loading, setLoading] = useState(false)
-  const [roleId, setRoleId] = useState<UUID>(member.roles[0].id)
+  const [roleIds, setRoleIds] = useState<string[]>(
+    member.roles?.map((r) => String(r.id)) ?? []
+  )
   const [errors, setErrors] = useState<FormErrors>({})
 
-  const roleItems = roles.map((r) => ({ value: String(r.id), label: r.name }))
-
-  // ASSUMPTION: adapt to your real change-role endpoint and payload
-  const updateRole = async (event: React.FormEvent) => {
+  // ASSUMPTION: adapt to your real update-roles endpoint. It should replace
+  // the member's roles with exactly this list.
+  const updateRoles = async (event: React.FormEvent) => {
     event.preventDefault()
     try {
       setLoading(true)
@@ -64,12 +58,12 @@ const ChangeMemberRole = ({
       const response = await workspaceMemberService.updateMemberRole(
         workspaceId,
         member.id,
-        { roleId }
+        { roleIds: roleIds as UUID[] }
       )
       if (response.ok) {
         toast.add({
           type: "success",
-          description: "Role updated successfully",
+          description: "Roles updated successfully",
         })
         onUpdated()
         setOpen(false)
@@ -79,7 +73,7 @@ const ChangeMemberRole = ({
         else {
           toast.add({
             type: "error",
-            description: data?.message || "Unable to update role",
+            description: data?.message || "Unable to update roles",
             priority: "high",
           })
         }
@@ -94,11 +88,11 @@ const ChangeMemberRole = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md">
-        <form onSubmit={updateRole} className="grid gap-4">
+        <form onSubmit={updateRoles} className="grid gap-4">
           <DialogHeader>
-            <DialogTitle>Change role</DialogTitle>
+            <DialogTitle>Change roles</DialogTitle>
             <DialogDescription>
-              Choose a new role for{" "}
+              Choose the roles for{" "}
               <span className="font-medium text-foreground">
                 {member.user.firstName} {member.user.lastName}
               </span>
@@ -107,38 +101,34 @@ const ChangeMemberRole = ({
           </DialogHeader>
 
           <FieldGroup>
-            <Field data-invalid={!!errors.roleId}>
-              <FieldLabel htmlFor="roleId">Role</FieldLabel>
-              <Select
-                items={roleItems}
-                value={roleId}
-                onValueChange={(value) => value && setRoleId(value)}
+            <Field data-invalid={!!(errors.roleIds || errors.roleId)}>
+              <FieldLabel htmlFor="roleIds">Roles</FieldLabel>
+              <RoleMultiSelect
+                id="roleIds"
+                roles={roles}
+                value={roleIds}
+                onChange={setRoleIds}
                 disabled={loading}
-              >
-                <SelectTrigger
-                  id="roleId"
-                  aria-invalid={!!errors.roleId}
-                  className="w-full"
-                >
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roleItems.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.roleId && <FieldError>{errors.roleId}</FieldError>}
+                invalid={!!(errors.roleIds || errors.roleId)}
+              />
+              <FieldDescription>
+                {roles.some(
+                  (r) => r.systemRole && roleIds.includes(String(r.id))
+                )
+                  ? "System roles such as Owner are locked. They can't be removed or given to anyone else."
+                  : "You can pick more than one role."}
+              </FieldDescription>
+              {(errors.roleIds || errors.roleId) && (
+                <FieldError>{errors.roleIds || errors.roleId}</FieldError>
+              )}
             </Field>
           </FieldGroup>
 
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button disabled={loading || !roleId} type="submit">
+            <Button disabled={loading || roleIds.length === 0} type="submit">
               {loading && <Loader2 className="animate-spin" />}
-              Save role
+              Save roles
             </Button>
           </DialogFooter>
         </form>

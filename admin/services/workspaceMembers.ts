@@ -5,7 +5,7 @@ export const workspaceMemberService = {
   getAll: (workspaceId: UUID) =>
     apiRequest(`/workspaces/${workspaceId}/members`),
 
-  inviteMember: (workspaceId: UUID, data: { email: string; roleId: UUID }) =>
+  inviteMember: (workspaceId: UUID, data: { email: string; roleIds: UUID[] }) =>
     apiRequest(`/workspaces/${workspaceId}/members`, {
       method: "POST",
       body: data as unknown as BodyInit,
@@ -15,10 +15,11 @@ export const workspaceMemberService = {
     apiRequest(`/workspaces/${workspaceId}/members/${workspaceMemberId}`, {
       method: "DELETE",
     }),
+
   updateMemberRole: (
     workspaceId: UUID,
     workspaceMemberId: UUID,
-    data: { roleId: UUID }
+    data: { roleIds: UUID[] }
   ) =>
     apiRequest(
       `/workspaces/${workspaceId}/members/${workspaceMemberId}/update-role`,

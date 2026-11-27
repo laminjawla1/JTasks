@@ -12,27 +12,21 @@ import {
 } from "@/components/ui/dialog"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { FormErrors } from "@/definitions"
 import { workspaceMemberService } from "@/services/workspaceMembers"
-import { workspaceService } from "@/services/workspaces"
 import { UUID } from "crypto"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
+import RoleMultiSelect, { RoleOption } from "./RoleMultiSelect"
 
-export type RoleOption = { id: string; name: string }
+export type { RoleOption }
 
 interface InviteMemberProps {
   workspaceId: UUID
@@ -51,18 +45,16 @@ const InviteMember = ({
 }: InviteMemberProps) => {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
-  const [roleId, setRoleId] = useState<UUID>()
+  const [roleIds, setRoleIds] = useState<string[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
-
-  const roleItems = roles.map((r) => ({ value: String(r.id), label: r.name }))
 
   const invite = async (event: React.FormEvent) => {
     event.preventDefault()
 
-    if (!roleId) {
+    if (roleIds.length === 0) {
       toast.add({
         type: "error",
-        description: "Role is required",
+        description: "Select at least one role",
       })
       return
     }
@@ -72,7 +64,7 @@ const InviteMember = ({
       setErrors({})
       const response = await workspaceMemberService.inviteMember(workspaceId, {
         email,
-        roleId,
+        roleIds: roleIds as UUID[],
       })
       if (response.ok) {
         toast.add({
@@ -107,7 +99,7 @@ const InviteMember = ({
             <DialogTitle>Invite member</DialogTitle>
             <DialogDescription>
               Enter the email of the person you want to invite and choose the
-              role they should have.
+              roles they should have.
             </DialogDescription>
           </DialogHeader>
 
@@ -129,37 +121,28 @@ const InviteMember = ({
               {errors.email && <FieldError>{errors.email}</FieldError>}
             </Field>
 
-            <Field data-invalid={!!errors.roleId}>
-              <FieldLabel htmlFor="roleId">Role</FieldLabel>
-              <Select
-                items={roleItems}
-                value={roleId}
-                onValueChange={(value) => value && setRoleId(value)}
+            <Field data-invalid={!!(errors.roleIds || errors.roleId)}>
+              <FieldLabel htmlFor="roleIds">Roles</FieldLabel>
+              <RoleMultiSelect
+                id="roleIds"
+                roles={roles}
+                value={roleIds}
+                onChange={setRoleIds}
                 disabled={loading}
-                required
-              >
-                <SelectTrigger
-                  id="roleId"
-                  aria-invalid={!!errors.roleId}
-                  className="w-full"
-                >
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roleItems.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.roleId && <FieldError>{errors.roleId}</FieldError>}
+                invalid={!!(errors.roleIds || errors.roleId)}
+              />
+              <FieldDescription>
+                You can pick more than one role.
+              </FieldDescription>
+              {(errors.roleIds || errors.roleId) && (
+                <FieldError>{errors.roleIds || errors.roleId}</FieldError>
+              )}
             </Field>
           </FieldGroup>
 
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button disabled={loading || !roleId} type="submit">
+            <Button disabled={loading || roleIds.length === 0} type="submit">
               {loading && <Loader2 className="animate-spin" />}
               Send invitation
             </Button>

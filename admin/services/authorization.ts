@@ -13,12 +13,8 @@ export const authorizationService = {
       body: data as unknown as BodyInit,
     }),
 
-  updateRole: (
-    workspaceId: UUID,
-    roleId: UUID,
-    data: { name: string; privilegeIds: Array<string> }
-  ) =>
-    apiRequest(`/workspaces/${workspaceId}/roles/${roleId}`, {
+  updateRole: (workspaceId: UUID, memberId: UUID, data: { roleIds: UUID[] }) =>
+    apiRequest(`/workspaces/${workspaceId}/members/${memberId}/roles`, {
       method: "PUT",
       body: data as unknown as BodyInit,
     }),
