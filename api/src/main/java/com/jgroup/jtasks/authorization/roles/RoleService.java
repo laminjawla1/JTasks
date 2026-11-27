@@ -6,6 +6,7 @@ import com.jgroup.jtasks.users.User;
 import com.jgroup.jtasks.workspaces.repositories.WorkspaceRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,4 +52,37 @@ public class RoleService {
                 .stream().map(Role::response).toList();
     }
 
+    @Transactional(readOnly = true)
+    public RoleResponse get(User currentUser, UUID workspaceId, UUID roleId) {
+        return roleRepository.findByUserWorkspaceAndId(currentUser.getId(), workspaceId, roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Role not found"))
+                .response();
+    }
+
+    @Transactional
+    public RoleResponse update(User currentUser, UUID workspaceId, UUID roleId, @Valid RoleRequest request) {
+        Role role = roleRepository.findByUserWorkspaceAndId(currentUser.getId(), workspaceId, roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Workspace not found"));
+
+        if (roleRepository.existsByNameAndWorkspaceId(request.name(), workspaceId) && !role.getName().equals(request.name())) {
+            throw new EntityExistsException("Role already exists");
+        }
+
+        List<Privilege> privileges = privilegeRepository.findAllById(request.privilegeIds());
+
+        if (privileges.isEmpty()) {
+            throw new EntityNotFoundException("No privileges matches the given ids");
+        }
+
+        role.setName(request.name());
+        role.setPrivileges(new HashSet<>(privileges));
+        return roleRepository.save(role).response();
+    }
+
+    @Transactional
+    public void delete(User currentUser, UUID workspaceId, UUID roleId) {
+        Role role = roleRepository.findByUserWorkspaceAndId(currentUser.getId(), workspaceId, roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+        roleRepository.delete(role);
+    }
 }

@@ -22,4 +22,14 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
     List<Role> findAllByUserAndWorkspace(UUID userId, UUID workspaceId);
 
     Optional<Role> findByNameAndWorkspaceId(String name, UUID workspaceId);
+
+    @Query("""
+        SELECT role FROM Role role
+        LEFT JOIN FETCH role.workspace workspace
+        LEFT JOIN FETCH workspace.members member
+        WHERE role.id = :roleId
+        AND workspace.id = :workspaceId
+        AND member.user.id = :userId
+    """)
+    Optional<Role> findByUserWorkspaceAndId(UUID userId, UUID workspaceId, UUID roleId);
 }

@@ -29,4 +29,29 @@ public class RoleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.create(currentUser, workspaceId, request));
     }
 
+    @GetMapping("/{roleId}")
+    public ResponseEntity<RoleResponse> get(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID roleId) {
+        return ResponseEntity.ok(roleService.get(currentUser, workspaceId, roleId));
+    }
+
+    @PutMapping("/{roleId}")
+    public ResponseEntity<RoleResponse> update(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID roleId,
+            @Valid @RequestBody RoleRequest request) {
+        return ResponseEntity.ok(roleService.update(currentUser, workspaceId, roleId, request));
+    }
+
+    @DeleteMapping("/{roleId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID roleId) {
+        roleService.delete(currentUser, workspaceId, roleId);
+        return ResponseEntity.noContent().build();
+    }
 }
