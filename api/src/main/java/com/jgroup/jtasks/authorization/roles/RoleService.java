@@ -83,6 +83,11 @@ public class RoleService {
     public void delete(User currentUser, UUID workspaceId, UUID roleId) {
         Role role = roleRepository.findByUserWorkspaceAndId(currentUser.getId(), workspaceId, roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+
+        if (role.getSystemRole()) {
+            throw new IllegalStateException("A system role cannot be deleted");
+        }
+
         roleRepository.delete(role);
     }
 }

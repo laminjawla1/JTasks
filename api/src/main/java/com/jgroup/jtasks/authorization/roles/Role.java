@@ -22,7 +22,7 @@ public class Role extends BaseEntity {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
-    private Boolean systemRole;
+    private Boolean systemRole = false;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
