@@ -1,5 +1,6 @@
 "use client"
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -23,7 +24,7 @@ import { FormErrors } from "@/definitions"
 import { workspaceService } from "@/services/workspaces"
 import { useWorkspaceStore } from "@/store/store"
 import { UUID } from "crypto"
-import { Loader2 } from "lucide-react"
+import { CheckCircle2Icon, InfoIcon, Loader2 } from "lucide-react"
 import { useState } from "react"
 
 export interface CreateWorkspace {
@@ -61,7 +62,9 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
         update([workspace, ...workspaces])
         setOpen(false)
       } else {
+        console.log("Unable to create a workspace")
         const data = await response.json()
+        console.log(data)
         if (data?.errors) setErrors(data.errors)
         else {
           toast.add({
@@ -72,6 +75,8 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
         }
       }
     } catch (error) {
+      console.log("Something went wrong")
+      console.log(error)
       console.error(error)
     } finally {
       setLoading(false)
@@ -88,6 +93,16 @@ const CreateWorkspace = ({ open, setOpen }: CreateWorkspaceProps) => {
               Create a new workspace here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
+
+          {errors?.message && (
+            <div className="grid w-full max-w-md items-start gap-4">
+              <Alert variant="destructive">
+                <CheckCircle2Icon />
+                <AlertTitle>Failed to create a workspace</AlertTitle>
+                <AlertDescription>{errors.message}</AlertDescription>
+              </Alert>
+            </div>
+          )}
 
           {/* Only the fields scroll, so the header and footer always stay visible */}
           <div className="-mx-1 max-h-[60svh] overflow-y-auto px-1 py-1">

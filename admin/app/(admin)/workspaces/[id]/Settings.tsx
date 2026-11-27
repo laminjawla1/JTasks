@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { CheckCircle2Icon, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +27,7 @@ import { workspaceService } from "@/services/workspaces"
 import { useWorkspaceStore } from "@/store/store"
 import DeleteWorkspace from "./DeleteWorkspace"
 import TransferOwnership from "./TransferOwnership"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface SettingsProps {
   workspace: Workspace | null
@@ -114,6 +115,15 @@ export const Settings = ({ workspace, onUpdated }: SettingsProps) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {errors?.message && (
+                <div className="grid w-full max-w-md items-start gap-4 mb-4">
+                  <Alert variant="destructive">
+                    <CheckCircle2Icon />
+                    <AlertTitle>Failed to update workspace</AlertTitle>
+                    <AlertDescription>{errors.message}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
               <FieldGroup className="max-w-2xl gap-5">
                 <Field data-invalid={!!errors.name}>
                   <FieldLabel htmlFor="name">Workspace name</FieldLabel>

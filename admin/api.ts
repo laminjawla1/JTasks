@@ -38,6 +38,5 @@ export async function apiRequest(
   ) {
     window.location.href = "/login"
   }
-
   return response
 }
